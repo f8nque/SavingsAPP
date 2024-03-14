@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{%block title %} Shopper | Bought Item {% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">SHOPPING BOUGHT ITEM FORM</h3>
+<p class="text-secondary"> Registration form into the Bought Item.</p>
+<div class="mb-3">
+		<table class="table table-sm table-bordered">
+			<thead>
+				<th>Item Date</th><th>Item Name</th><th>Quantity Ordered</th><th>Estimated Price</th>
+			</thead>
+			<tr>
+				<td>{{item.item_date}}</td><td>{{item.item_name}}</td><td>{{item.quantity}}</td><td>{{item.estimated_price}}</td>
+			</tr>
+			<tr>
+				<th>Status</th><th>Comment</th><th>Quantity Bought</th><th>Amount Paid</th>
+			</tr>
+			<tr>
+				<td>{{item.status}}</td><td>{{item.comment}}</td><td>{{item.quantity_bought}}</td><td>{{item.amount_paid}}</td>
+			</tr>
+		</table>
+    </div>
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="form-group col">
+			{% if form.date_bought.errors %}
+			    <div class="alert alert-danger">{{form.date_bought.errors}}</div>
+			{% endif %}
+			<label for="date_bought" class="form-control-label">Date Bought </label>
+			{{form.date_bought}}
+		</div>
+    </div>
+    <div class="row">
+		<div class="form-group col">
+			{% if form.quantity_bought.errors %}
+			    <div class="alert alert-danger">{{form.quantity_bought.errors}}</div>
+			{% endif %}
+			<label for="quantity_bought" class="form-control-label"> Quantity Bought</label>
+            {{form.quantity_bought}}
+		</div>
+	</div> <!--  chart row-->
+    <div class="row">
+        <div class="form-group col">
+			{% if form.amount_paid.errors %}
+			    <div class="alert alert-danger">{{form.amount_paid.errors}}</div>
+			{% endif %}
+			<label for="amount_paid" class="form-control-label">Amount Paid</label>
+			{{form.amount_paid}}
+		</div>
+    </div>
+
+  <div class="row">
+        <div class="form-group col">
+			{% if form.comment.errors %}
+			    <div class="alert alert-danger">{{form.comment.errors}}</div>
+			{% endif %}
+			<label for="comment" class="form-control-label"> Comment</label>
+			{{form.comment}}
+		</div>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" > Submit </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+{% endblock content %}

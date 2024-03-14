@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{%block title %} Shopper | Category List{% endblock title %}
+{% block content %}
+    <h3 class="text-success font-weight-bold">CATEGORY LIST</h3>
+    <p class="text-secondary"> Category List</p>
+    <a href="{%url 'category' %}">add category</a>
+    <div>
+
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                  <th scope="col">Category List</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for d in data %}
+              <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                <td>{{d.category_name}}</td>
+                <td>
+                    <a href="{%url 'category_update' d.id%}" class="badge badge-primary" >update</a>
+                    <a href="{%url 'category_delete' d.id%}" class="badge badge-danger" >delete</a>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+
+{% endblock content %}

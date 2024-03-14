@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{%block title %} Reports | Chart Transaction{% endblock title %}
+{% block content %}
+    <h3 class="text-success font-weight-bold">Transaction Report From {{start_date_f|date:"d M, Y"}} To {{end_date_f|date:"d M, Y"}} </h3>
+   <div class="mb-3">
+		<ul class="list-group">
+            <li class="list-group-item">Start Date: <span class="badge badge-primary">{{start_date_f|date:"d M, Y"}}</span></li>
+            <li class="list-group-item">End Date Amount: <span class="badge badge-primary">{{end_date_f|date:"d M, Y"}}</span></li>
+            <li class="list-group-item">Allocated Amount: <span class="badge badge-success">{{trans_data.allocated_amount}}</span></li>
+            <li class="list-group-item">Transacted Amount: <span class="badge badge-primary">{{trans_data.transacted_amount}}</span></li>
+            <li class="list-group-item">Transferred Amount: <span class="badge badge-secondary">{{trans_data.transferred_amount}}</span></li>
+          </ul>
+    </div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <label>Start Date: </label> <input type="date" name="start_date" id="start_date"/>
+        <label>Start Date: </label> <input type="date" name="end_date" id="end_date"/>
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+    </form>
+    <div>
+        <table class="table">
+            <thead>
+              <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Chart Name</th>
+                    <th scope="col">Allocated Amount</th>
+                    <th scope="col">Transferred Amount</th>`
+              </tr>
+            </thead>
+            <tbody>
+            {% for d in data %}
+              <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td>{{d.chart_name}}</td>
+                    <td>{{d.allocated_amount}}</td>
+                    <td>{{d.transferred_amount}}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+<script>
+    let start_date_elem = document.getElementById('start_date');
+    let end_date_elem = document.getElementById('end_date');
+    start_date_elem.value="{{start_date_f|date:'Y-m-d'}}";
+    end_date_elem.value="{{end_date_f|date:'Y-m-d'}}";
+
+
+</script>
+{% endblock content %}

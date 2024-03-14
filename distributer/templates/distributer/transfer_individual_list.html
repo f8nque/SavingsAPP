@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{%block title %} Chart | Transactions List{% endblock title %}
+{% block content %}
+    <h3 class="text-success font-weight-bold">{{transaction.chart_name}} Transfer List</h3>
+    <p class="text-secondary"> Contains a list of all extra amount allocated, transacted and transferred.</p>
+    <p> Chart Name: <span class="badge badge-primary">{{transaction.chart_name}}</span></p>
+    <p> Date Transaction: <span class="badge badge-primary"> {{transaction.transact_date}}</span></p>
+    <p>Allocated Amount: <span class="badge badge-success">{{transaction.allocated_amount}}</span></p>
+    <p>Transferred Amount: <span class="badge badge-secondary">{{transaction.transferred_amount}}</span></p>
+    <p>Remaining Amount: <span class="badge badge-danger">{{transaction.remaining_amount}}</span></p>
+    <a href ="{%url 'transfer_entry' pk %}"> add a transfer</a>
+    <div>
+        <table class="table">
+            <thead>
+              <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Transfer Date</th>
+                  <th scope="col">Transfer Amount</th>
+                  <th scope="col">Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for d in data %}
+              <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td>{{d.transfer_date}}</td>
+                    <td>{{d.transfer_amount}}</td>
+                    <td>{{d.comment}}</td>
+                <td>
+                    <a href="{% url 'transfer_update' d.id%}" class="badge badge-primary" >update</a>
+                    <a href="{% url 'transfer_delete' d.id%}" class="badge badge-danger" >delete</a>
+                </td>
+
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+
+{% endblock content %}

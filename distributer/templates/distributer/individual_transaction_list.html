@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{%block title %} Individual | Transaction List{% endblock title %}
+{% block content %}
+    <h3 class="text-success font-weight-bold">INDIVIDUAL TRANSACTIONS LIST</h3>
+    <p class="text-secondary">How an extra amount transaction is allocated and also its transferred amount  </p>
+
+    <p>Allocation Date: <span class="badge badge-primary">{{item.allocate_date}}</span></p>
+    <p>Transacted Amount: <span class="badge badge-secondary">{{item.transacted_amount}}</span></p>
+    <p>Allocated Amount: <span class="badge badge-secondary">{{item.allocated_amount}}</span></p>
+    <p>Amount Transferred: <span class="badge badge-secondary">{{item.transferred_amount}}</span></p>
+
+    <a href="{%url 'individual_item' item.id%}">create a transaction</a>
+
+    <div>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Chart</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Percentage</th>
+                <th scope="col">Allocated Amount</th>
+                <th scope="col">Transferred Amount</th>
+                <th scope="col">Amount Remaining</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for d in data %}
+              <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td>{{d.chart_name}}</td>
+                    <td>{{d.priority}}</td>
+                    <td>{{d.perc}}%</td>
+                  <td>{{d.allocated_amount}}</td>
+                  <td>{{d.transferred_amount}}</td>
+                  <td>{{d.amount_remaining}}</td>
+                <td>
+                    <a href="{%url 'transfer_list' d.id%}" class="badge badge-success" >view</a>
+                    <a href="{%url 'individual_update' d.id%}" class="badge badge-primary" >update</a>
+                    <a href="{%url 'individual_delete' d.id%}" class="badge badge-danger" >delete</a>
+                </td>
+
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+
+{% endblock content %}

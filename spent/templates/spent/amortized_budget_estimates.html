@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{%block title %} Budget | Amortized Estimates{% endblock title %}
+
+{% block content %}
+<h3 class="text-center text-success font-weight-bold">AMORTIZED BUDGET ESTIMATION </h3>
+<h4 class="font-weight-bold text-center text-secondary ">List the bugdet estimates based on the amount you spent in a given period</h4>
+<h5 class="font-weight-bold text-center text-secondary">Period Given:One month, Three Months, Six Month and one Year </h5>
+    <div>
+
+        <table class="table table-sm">
+            <thead>
+                <th></th>
+               <th>#</th>
+               <th>Budget Item</th>
+               <th>Average</th>
+               <th>Last 1 Month</th>
+               <th>Last 3 Months</th>
+               <th>Last 6 Months</th>
+
+            </thead>
+            <tbody>
+                {% for data in estimates %}
+                <tr id="row_{{data.name}}">
+                    <td><input type="checkbox" id="{{data.name}}"/></td>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{data.name}}</></td>
+                    <td>{{data.average}}</td>
+                    <td>{{data.estimate_1_month}}</td>
+                    <td> {{data.estimate_3_months}}</td>
+                    <td>{{data.estimate_6_months}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <script>
+             function hideRow(event){
+            	if(event.target.checked){
+            	  var check_id = event.target.getAttribute("id");
+            	  var row_id = "row_"+check_id;
+            	  var rowElem = document.getElementById(row_id);
+            	  rowElem.style.display="none";
+            	}
+            }
+            {% for data in estimates %}
+            document.getElementById("{{data.name}}").addEventListener('click',hideRow);
+            {% endfor %}
+
+        </script>
+
+    </div>
+{% endblock content %}

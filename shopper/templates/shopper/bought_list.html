@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{%block title %} Shopper | Item Bought List{% endblock title %}
+{% block content %}
+    <h3 class="text-success font-weight-bold">SHOPPING ITEM BOUGHT LIST</h3>
+    <p class="text-secondary"> Bought List</p>
+    <a href="{%url 'bought_item' pk %} " class="badge badge-primary">Add Item Bought</a>
+    <a href="{%url 'shopping_list'%}" class="badge badge-secondary">Shopping List</a>
+<table class="table table-sm table-bordered">
+			<thead>
+				<th>Item Date</th><th>Item Name</th><th>Quantity Ordered</th><th>Estimated Price</th>
+			</thead>
+			<tr>
+				<td>{{item.item_date}}</td><td>{{item.item_name}}</td><td>{{item.quantity}}</td><td>{{item.estimated_price}}</td>
+			</tr>
+			<tr>
+				<th>Status</th><th>Comment</th><th>Quantity Bought</th><th>Amount Paid</th>
+			</tr>
+			<tr>
+				<td>{{item.status}}</td><td>{{item.comment}}</td><td>{{item.quantity_bought}}</td><td><span class="text-success">{{item.amount_paid}} </span>| <span class="text-danger">B:({{item.amount_remaining}})</span></td>
+			</tr>
+		</table>
+    <div>
+
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                  <th scope="col">Date Item Bought</th>
+                  <th scope="col">Quantity Bought</th>
+                  <th scope="col">Amount Paid</th>
+                  <th scope="col">Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for d in data %}
+              <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                  <td>{{d.date_bought}}</td>
+                  <td>{{d.quantity_bought}}</td>
+                  <td>{{d.amount_paid}}</td>
+                  <td>{{d.comment}}</td>
+                <td>
+                    <a href="{%url 'update_bought' d.id%}" class="badge badge-primary" >update</a>
+                    <a href="{%url 'delete_bought' d.id%}" class="badge badge-danger" >delete</a>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+
+{% endblock content %}

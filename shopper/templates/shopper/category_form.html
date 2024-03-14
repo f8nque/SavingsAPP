@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{%block title %} Shopper | Category Form{% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">CATEGORY FORM</h3>
+<p class="text-secondary"> Registration form for category item used in shopping list</p>
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+    <div class="row">
+		<div class="form-group col">
+			{% if form.category_name.errors %}
+			    <div class="alert alert-danger">{{form.category_name.errors}}</div>
+			{% endif %}
+			<label for="category_name" class="form-control-label"> Category</label>
+            {{form.category_name}}
+		</div>
+	</div> <!--  category row-->
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" > Submit </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+{% endblock content %}

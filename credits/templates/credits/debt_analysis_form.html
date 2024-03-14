@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{%block title %} Credit | Debt History{% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+{% endblock head %}
+
+{% block content %}
+<div class="">
+
+
+<h3 class="text-success text-center font-weight-bold">DEBT ANALYSIS PAGE</h3>
+<p class="text-secondary text-center "> Monthly, Quarterly,Yearly Individual Summary</p>
+<div>
+    <form action="" method="post">
+       {%csrf_token%}
+       <div class="form-group">
+        <label class="form-control-label">Filter Year</label>
+           <select class="form-control" name="debt_year">
+               {% for year in debt_years %}
+               <option  value="{{year}}">{{year}}</option>
+               {% endfor %}
+           </select>
+        <button class="btn btn-outline-primary m-3" type="submit">Filter</button>
+       </div>
+
+    </form>
+</div>
+<section style="border: 1px solid grey;overflow-x:scroll">
+    <h3 class="text-center text-primary">Monthly Total Debt Summary for {{monthly_data.0.year}}</h3>
+    <table class="table table-sm table-stripped " id="table">
+        <thead>
+            <th>Month</th><th>Total Debt</th><th>Total Paid</th><th>Debt Remaining</th><th>Comment</th>
+        </thead>
+        <tbody>
+        {% for month in monthly_data %}
+         <tr>
+             <td>{{month.month}}</td>
+             <td>{{month.amount_borrowed}}</td>
+             <td>{{month.amount_paid}}</td>
+             <td>{{month.amount_remaining}}</td>
+             {% if month.amount_remaining <= 0 %}
+                <td class="badge badge-success" >Fully Paid</td>
+             {% else %}
+                <td class="badge badge-danger" >Pending Debt</td>
+             {% endif %}
+         </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section style="border: 1px solid grey; margin-top:10px;overflow-x:scroll;">
+    <h3 class="text-center text-primary">Individual Monthly Total Debt Summary for {{monthly_data.0.year}}</h3>
+    <table class="table table-stripped">
+        <thead>
+        <td>Debtor</td>
+        {% for agency_month in months %}
+        <th>
+            {{agency_month}}
+        </th>
+        {% endfor %}
+        <th>Total</th>
+        </thead>
+        <tbody id="monthly_ind">
+        {% for debtor,year_dict in agency_data.items %}
+        <tr>
+            <td>{{debtor}}</td>
+            {% for month_data in year_dict.values %}
+            <td>{{month_data}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+</section>
+
+<section style="overflow-x:scroll;">
+    <div>
+        <div class=""  id="debt_line_graph" style="height:600px;min-width:100vw;"></div>
+    </div>
+
+    <script>
+    	var t = document.getElementById("table");
+    	const rows = t.rows;
+    	let total_debt = 0;
+    	let debt_paid =0;
+    	let debt_remaining = 0;
+    	for (let i = 1; i< rows.length; i++){
+    		total_debt += parseInt(rows[i].cells[1].textContent);
+    		debt_paid += parseInt(rows[i].cells[2].textContent);
+    		debt_remaining += parseInt(rows[i].cells[3].textContent);
+    	}
+    	const tr = document.createElement('tr');
+    	tr.classList.add("table-secondary");
+    	var td1 = tr.appendChild(document.createElement('td'));
+    	td1.innerHTML="<b>Total</b>"
+    	var td2 = tr.appendChild(document.createElement('td'));
+    	td2.innerHTML=total_debt;
+    	var td3 = tr.appendChild(document.createElement('td'));
+    	td3.innerHTML=debt_paid;
+    	var td4 = tr.appendChild(document.createElement('td'));
+    	td4.innerHTML=debt_remaining;
+    	var td5 = tr.appendChild(document.createElement('td'));
+
+    	td5.innerHTML= (debt_remaining <= 0) ? "<span class='badge badge-success'>Fully Paid</span>": "<span class='badge badge-danger'>Overall Debt Pending</span>";
+    	t.appendChild(tr);
+
+
+
+    	//monthly_individual_total
+    	let individual_table = document.getElementById("monthly_ind");
+    	let ind_rows = individual_table.rows;
+    	for (let i = 0; i< ind_rows.length; i++){
+    		let sum = 0;
+    		let tds = ind_rows[i].cells;
+    		for (let j =1 ; j < tds.length; j++){
+    			sum += parseInt(tds[j].textContent);
+    		}
+    		new_td = document.createElement('td');
+    		//append the newly created td in the row
+    		new_td.innerHTML="<b>" + sum + "</b>";
+    		new_td.classList.add("table-secondary");
+    		new_td.classList.add("font-weight-bold");
+
+    		ind_rows[i].appendChild(new_td);
+    	}
+
+        google.charts.load('current',{packages:['corechart']});
+        google.charts.setOnLoadCallback(debtLineGraph);
+
+        function debtLineGraph(){
+            let data = new google.visualization.DataTable();
+            data.addColumn({id:'month',type:'string',label:'Month'});
+            data.addColumn({id:'debt_owed',type:'number',label:'Debt Owed'});
+            data.addColumn({type:'string',role:'annotation'});
+            data.addColumn({type:'string',role:'style'});
+            data.addColumn({type:'debt_paid',type:'number',label:'Debt Paid'});
+            data.addColumn({type:'string',role:'annotation'});
+            data.addColumn({type:'string',role:'style'});
+
+            {% for d in monthly_data %}
+            data.addRow(["{{d.month}}",{{d.amount_borrowed}},'{{d.amount_borrowed}}','red',{{d.amount_paid}},'{{d.amount_paid}}','blue'])
+            {% endfor %}
+
+            let options = {
+                title: 'DEBT ANALYSIS GRAPH : YEAR {{monthly_data.0.year}}',
+                vAxis: {title: 'AMOUNT BORROWED'},
+                hAxis: {title: 'MONTH'},
+                legend:{position:'bottom'},
+                colors: ['red', 'blue'],
+                };
+
+                let chart = new google.visualization.LineChart(document.getElementById('debt_line_graph'));
+                chart.draw(data, options);
+        }
+    </script>
+
+</section>
+</div>
+{% endblock content %}

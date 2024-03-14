@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{%block title %} Budget | Budget Performance {% endblock title %}
+
+{% block content %}
+<h3 class="text-center text-success font-weight-bold">BUDGET PERFORMANCE </h3>
+<h4 class="font-weight-bold text-center text-secondary ">Analyzes Budget Spent in the last 15 Months</h4>
+<h5 class="font-weight-bold text-center text-secondary">Checks whether Budget Goals were Achieved by Comparing Budget Completion Rate vs Budget Burn rate</h5>
+<h5 class="font-weight-bold text-center text-secondary">Budget Burn rate <= 100% [Green] > 100% [Red]</h5>
+<h5 class="font-weight-bold text-center text-secondary">Budget Completion rate < 85% [Red] > 85% [Green]</h5>
+    <div>
+
+        <table class="table table-sm">
+            <thead>
+               <th>#</th>
+               <th>Budget Name</th>
+               <th>Budget Total</th>
+               <th>Budget Spent</th>
+               <th>Budget Completed</th>
+               <th>Burn Rate</th>
+               <th>Completion Rate</th>
+
+            </thead>
+            <tbody>
+                {% for b,data in performance_data.items %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{data.name}}</></td>
+                    <td>{{data.performance.budget_amount}}</td>
+                    <td>{{data.performance.budget_spent}}</td>
+                    <td>{{data.performance.budget_completed}}</td>
+                    <td>
+                        <span
+                        {% if data.performance.budget_spent_perc > 100 %} class="badge badge-danger"
+                        {% else %} class="badge badge-success"
+                        {%endif%}>
+                            {{data.performance.budget_spent_perc}}%
+                        </span>
+                    </td>
+                    <td>
+                        <span
+                        {% if data.performance.budget_completed_perc < 85 %} class="badge badge-danger"
+                        {% else %} class="badge badge-success"
+                        {%endif%}>
+                            {{data.performance.budget_completed_perc}}%
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

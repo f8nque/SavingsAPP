@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+{%block title %} Spent | Weekly Analysis {%endblock title %}
+{% block content %}
+<h3 class="text-center text-secondary">WEEKLY ANALYSIS FOR THE QUARTER STARTING FROM {{quarter_start}} TO {{quarter_end}}</h1>
+<div>
+    <img src="{% static 'spent/analysis.png' %}" alt="analysis image" width="100%" height="300"/>
+
+</div>
+
+<table class="table">
+    <tr class="">
+        <th>No</th>
+        <th>Start Week Date</th>
+        <th>End Week Date</th>
+        <th>Amount</th>
+    </tr>
+  {% for result in weekly_list %}
+    <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{result.0}}</td>
+        <td>{{result.1}}</td>
+        <td>{{result.2}}</td>
+    </tr>
+    {% endfor%}
+</table>
+{% endblock content %}

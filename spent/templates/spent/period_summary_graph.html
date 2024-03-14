@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{%block title %} Spent | Summary Graph{% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock head %}
+
+{% block content %}
+<h3 class="text-center text-success font-weight-bold">SPENT GRAPH SUMMARY FOR A SPECIFIED PERIOD </h3>
+
+<div class="mx-0 text-secondary font-weight-bold">
+    <h3 class="font-weight-bold text-center">
+   	The Summary show below how you have been spending your money.
+        Period: From <span class="text-primary">{{start_date}}</span> To <span class="text-primary">{{end_date}}</span>: [{{days}} Days]
+
+    </h3>
+</div>
+    <div class="text-center">
+        <form action="" method="post">
+            {% csrf_token %}
+            <label for="start_date" >StartDate:</label>
+            <input type="date" name="start_date" id="start_date" value="{{start_date|date:'Y-m-d'}}"/>
+            <label for="end_date" >EndDate:</label>
+            <input type="date" name="end_date" id="end_date" value="{{end_date|date:'Y-m-d'}}"/>
+            <button class="btn btn-outline-primary">Filter</button>
+        </form>
+    </div>
+
+    <div>
+
+        <table class="table table-sm">
+            <thead>
+               <th>#</th> <th>Category</th> <th>Total Spent</th><td>Daily Average</td><td>Month Estimate:<span class="badge badge-primary">{{today|date:'M, Y'}} [{{month_days}}]</span></td>
+            </thead>
+            <tbody>
+                {% for data in graph  %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td><a class="badge badge-primary" target="_blank" rel="noopener noreferrer"
+                    href="https://gachau.pythonanywhere.com/singleselection/{{start_date|date:'Y-m-d'}}/{{end_date|date:'Y-m-d'}}/{{data.category}}/">
+                        {{data.category}}</a></td>
+                    <td>{{data.amount_spent}}</td>
+                    <td>{{data.daily_average}}</td>
+                    <td>{{data.month_estimate}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

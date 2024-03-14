@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load tz %}
+{%block title %} Allocate | Update Allocate Form{% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">ALLOCATION ENTRY FORM</h3>
+<p class="text-secondary"> This is an Entry Form for the extra money not in the budget.</p>
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="form-group col">
+			{% if form.chart_date.errors %}
+			    <div class="alert alert-danger">{{form.allocate_date.errors}}</div>
+			{% endif %}
+			<label for="allocate_date" class="form-control-label"> Allocate Date </label>
+			{{form.allocate_date}}
+		</div>
+    </div>
+    <div class="row">
+		<div class="form-group col">
+			{% if form.allocate_amount.errors %}
+			    <div class="alert alert-danger">{{form.allocate_amount.errors}}</div>
+			{% endif %}
+			<label for="allocate_amount" class="form-control-label"> Allocated Amount</label>
+            {{form.allocate_amount}}
+		</div>
+	</div> <!--  chart row-->
+    <div class="row">
+        <div class="form-group col">
+			{% if form.status.errors %}
+			    <div class="alert alert-danger">{{form.comment.errors}}</div>
+			{% endif %}
+			<label for="comment" class="form-control-label">Comment</label>
+			{{form.comment}}
+		</div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" >Update</button>
+        </div>
+    </div>
+
+
+</form>
+
+</div>
+
+{% endblock content %}

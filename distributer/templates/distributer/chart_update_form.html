@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{%block title %} Chart | Chart Form{% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">CHART UPDATE FORM</h3>
+<p class="text-secondary"> Update form for category used in extra money distribution.</p>
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="form-group col">
+			{% if form.chart_date.errors %}
+			    <div class="alert alert-danger">{{form.chart_date.errors}}</div>
+			{% endif %}
+			<label for="chart_date" class="form-control-label"> Registration Date </label>
+			{{form.chart_date}}
+		</div>
+    </div>
+    <div class="row">
+		<div class="form-group col">
+			{% if form.chart_name.errors %}
+			    <div class="alert alert-danger">{{form.chart_name.errors}}</div>
+			{% endif %}
+			<label for="chart_name" class="form-control-label"> Chart</label>
+            {{form.chart_name}}
+		</div>
+	</div> <!--  chart row-->
+    <div class="row">
+        <div class="form-group col">
+			{% if form.status.errors %}
+			    <div class="alert alert-danger">{{form.status.errors}}</div>
+			{% endif %}
+			<label for="status" class="form-control-label"> Chart Status</label>
+			{{form.status}}
+		</div>
+    </div>
+
+	<div class="row">
+        <div class="form-group col">
+			{% if form.perc.errors %}
+			    <div class="alert alert-danger">{{form.perc.errors}}</div>
+			{% endif %}
+			<label for="perc" class="form-control-label"> Chart Percentage</label>
+			{{form.perc}}
+		</div>
+    </div>
+
+	<div class="row">
+        <div class="form-group col">
+			{% if form.priority.errors %}
+			    <div class="alert alert-danger">{{form.priority.errors}}</div>
+			{% endif %}
+			<label for="perc" class="form-control-label"> Chart Priority</label>
+			{{form.priority}}
+		</div>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" > Update </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+{% endblock content %}

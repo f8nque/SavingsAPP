@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load tz %}
+{%block title %} Individual | Transaction Form{% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">Individual Allocation Form</h3>
+<p class="text-secondary"> Manual Extra Money Allocation Form.</p>
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="form-group col">
+			{% if form.transact_date.errors %}
+			    <div class="alert alert-danger">{{form.transact_date.errors}}</div>
+			{% endif %}
+			<label for="allocate_date" class="form-control-label"> Transact Date </label>
+			{{form.transact_date}}
+		</div>
+    </div>
+    <div class="row">
+		<div class="form-group col">
+			{% if form.chart_id.errors %}
+			    <div class="alert alert-danger">{{form.chart_id.errors}}</div>
+			{% endif %}
+			<label for="chart_name" class="form-control-label"> Chart </label>
+            {{form.chart_id}}
+		</div>
+	</div> <!--  chart row-->
+    <div class="row">
+        <div class="form-group col">
+			{% if form.allocated_amount.errors %}
+			    <div class="alert alert-danger">{{form.allocated_amount.errors}}</div>
+			{% endif %}
+			<label for="status" class="form-control-label">Allocated Amount</label>
+			{{form.allocated_amount}}
+		</div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" > Update </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+{% endblock content %}

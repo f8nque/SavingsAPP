@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %} Budget | Individual Budget {%endblock title %}
+
+{%block content %}
+<div class="container-fluid px-1 py-5 mx-auto">
+	<div class="text-center">
+            <h2 class="h2 text-primary font-weight-bold">{{budgetdata.name}}</h2>
+            <p class="h3 blue-text">{{budgetdata.description}}</p>
+
+            <ul class="list-unstyled d-flex flex-column">
+            	<li class="h4">Track Date from <span class="badge badge-primary">{{budgetdata.start_date}} </span> To <span class="badge badge-primary">{{budgetdata.end_date}}</span></li>
+            	<li class="h4">Available Amount: <span class="badge badge-danger">{{budgetdata.track_amount}}</span></li>
+            	<li class="h4">Budget Amount: <span class="badge badge-success">{{budgetdata.budget_total}}</span><span class="badge badge-secondary">Budget offset: {{budgetdata.budget_diff}}</span></li>
+            	<li class="h4">Budget Spent: <span class="badge badge-secondary">{{budgetdata.total_spent}}</span></li>
+            	<li class="h4">Remaining Budget: <span class="badge badge-secondary">{{budgetdata.remaining_budget}}
+            	<span class="badge badge-primary ">+{{pos_variance}}</span>
+            	<span class="badge badge-danger">-{{neg_variance}}</span>
+            	</span>
+            	</li>
+            	<li class="h4">Burn Rate: <span class="badge badge-danger">{{burn_rate}}%</span></li>
+            	<li class="h4">Budget Completion: <span class="badge badge-success">{{budget_completion}}%</span></li>
+				<li class="h4">Budget Status: <span {% if budgetdata.budget_status == "on budget" %} class="badge badge-success" {%else%} class="badge badge-danger" {%endif%}>{{budgetdata.budget_status}}</span></li>
+
+            </ul>
+				<div class="m-0 p-0">
+				<table class="table table-sm table-hover">
+				  <tbody>
+                  {% for group in groupdata %}
+				  	<tr>
+					  <th scope="col" class="text-left text-white h5 bg-secondary" colspan="3">{{group.category}}
+					  <span class="badge badge-primary">budget%: {{group.budget_perc}}%</span>
+						 <span {% if group.spent_perc > 100 %} class="badge badge-danger"
+							 {%else  %} class="badge badge-success" {%endif %}>(spent%:  {{group.spent_perc}}%)</span> </th>
+
+					  <th scope="col" class="text-left text-white  h5 bg-secondary">Budget Amount <span class="badge badge-primary">{{group.budget_total}}</span></th>
+					  <th scope="col" class="text-left text-white h5 bg-secondary">Budget Spent <span class="badge badge-success">{{group.spent_total}}</span></th>
+					  <th scope="col" class="text-left text-white h5 bg-secondary">Remaining Amount <span class="badge badge-danger">{{group.remaining_total}}</span></th>
+					</tr>
+
+					<tr>
+					  <th scope="row">No</th>
+					  <th scope="row">Category</th>
+					  <th scope="row">Budget Amount</th>
+					  <th scope="row">Amount Spent</th>
+					  <th scope="row">Amount Remaining</th>
+					  <th scope="row">Budget Status</th>
+					</tr>
+                  {% for data in datalist %}
+                    {% if data.category == group.category %}
+					<tr>
+					  <th scope="row"><input type="checkbox" id="{{data.name}}"/> <span id="{{data.name}}_counter">{{forloop.counter}}</span> </th>
+					  <td>{{data.name}} <span class="badge badge-primary">budget%: {{data.budget_perc}}%</span>
+						 <span {% if data.spent_perc > 100 %} class="badge badge-danger"
+							 {%else  %} class="badge badge-secondary" {%endif %}>(spent%:  {{data.spent_perc}}%)</span> </td>
+					  <td>{{data.amount}}</td>
+					  <td>{{data.budget_spent}}</td>
+					  <td>{{data.remaining_budget}} | [W:{{data.weighted}}]</td>
+					  <td><span {% if data.budget_status == "on budget" %} class="badge badge-success" {%else %} class="badge badge-danger" {% endif %}>
+                      {{data.budget_status}}</span></td>
+					</tr>
+					{% for log in log_data %}
+					    {% if data.id == log.budgetitem_id %}
+					        <tr class="{{data.name}}_log" style="display:none;">
+					            <td class="text-center text-secondary">{{forloop.counter}}</td>
+					            <td class="text-center text-secondary">{{data.name}}</td>
+					            <td class="text-center text-secondary">{{log.log_date}}</td>
+					            <td class="text-center text-secondary">{{log.amount}}</td>
+					            <td colspan="2" class="text-center text-secondary">{{log.comment}} </td>
+					        </tr>
+					    {% endif %}
+					{% endfor %}
+                  {% endif %}
+                  {% endfor %}
+
+                  {% endfor %}
+
+				  </tbody>
+				</table>
+				</div> <!-- end card div -->
+            </div> <!-- end format div -->
+      </div> <!-- end container fluid -->
+      <script>
+
+        function hideRow(event){
+            	if(event.target.checked){
+            	  var check_id = event.target.getAttribute("id");
+            	  var rows_class = check_id+"_log";
+            	  const rowElems = document.getElementsByClassName(rows_class);
+                    for (let i = 0; i < rowElems.length; i++) {
+                      rowElems[i].style.display = "";
+                    }
+
+            	}else{
+            	  var check_id = event.target.getAttribute("id");
+            	  var rows_class = check_id+"_log";
+            	  var rowElems = document.getElementsByClassName(rows_class);
+            	  for(var i = 0 ; i < rowElems.length; i++){
+            	      rowElems[i].style.display="none";
+            	  }
+            	}
+            }
+            {% for data in datalist %}
+                document.getElementById("{{data.name}}").addEventListener('click',hideRow);
+                var counter_elem = document.getElementById("{{data.name}}_counter");
+                var class_ids = "{{data.name}}"+ "_log";
+                if(document.getElementsByClassName(class_ids).length > 0){
+                     counter_elem.style.color="green";
+
+                 }
+            {% endfor %}
+      </script>
+
+{% endblock content %}

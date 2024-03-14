@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{%block title %} Spent | Summary Graph{% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock head %}
+
+{% block content %}
+<h3 class="text-center text-success font-weight-bold">CURRENT BUDGET ESTIMATION </h3>
+
+<div class="mx-0 text-secondary font-weight-bold">
+    <h3 class="font-weight-bold text-center">
+   	The Summary below tries to estimate the current budget based on previous budget spents.
+        Period: From <span class="text-primary">{{start_date}}</span> To <span class="text-primary">{{end_date}}</span>: [{{days}} Days]
+        <span class= "badge badge-secondary">Remaining Days: [{{days_remaining}} Days]</span>
+
+    </h3>
+</div>
+    <div class="text-center">
+        <form action="" method="post">
+            {% csrf_token %}
+            <label for="start_date" >StartDate:</label>
+            <input type="date" name="start_date" id="start_date" value="{{start_date|date:'Y-m-d'}}"/>
+            <label for="end_date" >EndDate:</label>
+            <input type="date" name="end_date" id="end_date" value="{{end_date|date:'Y-m-d'}}"/>
+            <button class="btn btn-outline-primary">Filter</button>
+        </form>
+    </div>
+
+    <div>
+
+        <table class="table table-sm">
+            <thead>
+                <th></th>
+               <th>#</th> <th>Category</th><th>Total Spent</th>
+               <th>Budget Estimate</th>
+               <th>Budgeted Amount</th><td>Budget Spent</td><td>Remaining Budget</td>
+               <th>Remaining Estimate
+               <span class="badge badge-primary">{{today|date:'M, Y'}} [{{month_days}}]</span></th>
+
+            </thead>
+            <tbody>
+                {% for data in graph  %}
+                <tr id="row_{{data.category}}">
+                    <td><input type="checkbox" id="{{data.category}}"/></td>
+                    <td>{{forloop.counter}}</td>
+                    <td><a class="badge badge-primary" target="_blank" rel="noopener noreferrer"
+                    href="https://gachau.pythonanywhere.com/categoryselection/{{start_date|date:'Y-m-d'}}/{{end_date|date:'Y-m-d'}}/{{data.category}}/">
+                        {{data.category}}</a></td>
+                    <td>{{data.specified_period_spent}}</td>
+                    <td>{{data.current_month_estimate}}</td>
+                    <td> {{data.ba}} |
+                    {% if data.budget_minus_estimate < 0 %}
+                    <span class="badge badge-danger">({{data.budget_minus_estimate}})</span>
+                    {% else %}
+                    <span class="badge badge-success">({{data.budget_minus_estimate}})</span>
+                    {% endif %}
+                     </td>
+                    <td>{{data.bs}}</td>
+                    <td>{{data.bd}}</td>
+                    <td>{{data.estimate_remaining}} |
+                    {% if data.remaining_month_est < 0 %}
+                    <span class="badge badge-danger">({{data.remaining_month_est}})</span>
+                    {% else %}
+                    <span class="badge badge-success">({{data.remaining_month_est}})</span>
+                    {% endif %}
+                     </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <script>
+             function hideRow(event){
+            	if(event.target.checked){
+            	  var check_id = event.target.getAttribute("id");
+            	  var row_id = "row_"+check_id;
+            	  var rowElem = document.getElementById(row_id);
+            	  rowElem.style.display="none";
+            	}
+            }
+            {% for data in graph %}
+            document.getElementById("{{data.category}}").addEventListener('click',hideRow);
+            {% endfor %}
+
+
+
+
+        </script>
+
+    </div>
+{% endblock content %}

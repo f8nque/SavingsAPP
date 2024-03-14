@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{%block title %} Chart | Transactions List{% endblock title %}
+{% block content %}
+    <h3 class="text-success font-weight-bold">TRANSACTION LIST</h3>
+    <p class="text-secondary"> Contains a list of all extra amount allocated, transacted and transferred.</p>
+    <div>
+        <table class="table">
+            <thead>
+              <tr>
+                  <th scope="col">#</th>
+                <th scope="col">Transaction Date</th>
+                <th scope="col">Transaction Amount</th>
+                <th scope="col">Allocated Amount</th>
+                <th scope="col">Transferred Amount</th>
+                  <th scope="col">Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for d in data %}
+              <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td>{{d.allocate_date}}</td>
+                    <td>{{d.transacted_amount}}</td>
+                    <td>{{d.allocated_amount}}</td>
+                  <td>{{d.transferred_amount}}</td>
+                  <td>{{d.comment}}</td>
+                <td>
+                    <a href="{%url 'individual_list' d.id%}" class="badge badge-success" >view</a>
+                    <a href="{%url 'allocate_update' d.id%}" class="badge badge-primary" >update</a>
+                    <a href="{%url 'allocate_delete' d.id%}" class="badge badge-danger" >delete</a>
+                </td>
+
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+
+{% endblock content %}

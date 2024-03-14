@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{%block title %} Shopper | Update Bought Item {% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">UPDATE SHOPPING BOUGHT ITEM FORM</h3>
+<p class="text-secondary"> Update form into the Bought Item.</p>
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="form-group col">
+			{% if form.date_bought.errors %}
+			    <div class="alert alert-danger">{{form.date_bought.errors}}</div>
+			{% endif %}
+			<label for="date_bought" class="form-control-label">Date Bought </label>
+			{{form.date_bought}}
+		</div>
+    </div>
+    <div class="row">
+		<div class="form-group col">
+			{% if form.quantity_bought.errors %}
+			    <div class="alert alert-danger">{{form.quantity_bought.errors}}</div>
+			{% endif %}
+			<label for="quantity_bought" class="form-control-label"> Quantity Bought</label>
+            {{form.quantity_bought}}
+		</div>
+	</div> <!--  chart row-->
+    <div class="row">
+        <div class="form-group col">
+			{% if form.amount_paid.errors %}
+			    <div class="alert alert-danger">{{form.amount_paid.errors}}</div>
+			{% endif %}
+			<label for="amount_paid" class="form-control-label">Amount Paid</label>
+			{{form.amount_paid}}
+		</div>
+    </div>
+
+  <div class="row">
+        <div class="form-group col">
+			{% if form.comment.errors %}
+			    <div class="alert alert-danger">{{form.comment.errors}}</div>
+			{% endif %}
+			<label for="comment" class="form-control-label"> Comment</label>
+			{{form.comment}}
+		</div>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" > Update </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+{% endblock content %}

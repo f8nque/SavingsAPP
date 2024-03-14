@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %} Shopper | Shopping List {%endblock title %}
+
+{%block content %}
+<div class="container-fluid px-1 py-5 mx-auto">
+	<div class="text-center">
+		<h2 class="h2 text-primary font-weight-bold">SHOPPING BUSKET</h2>
+		<p class="h3 blue-text">Consolidate Shopping List</p>
+		<p class="h4 text-secondary"> You have {{num_urgent.num}} Urgent Item</p>
+		<a href="{%url 'shopping' %}">Add a Shopping Item</a>
+		<form action="" method="post">
+			{% csrf_token %}
+			<div>
+				<select id="status" name="status">
+					<option value="completed">Completed</option>
+					<option value="all">All</option>
+				</select>
+				<button type="submit" class="btn btn-outline-primary">Filter</button>
+			</div>
+		</form>
+
+	</div>
+
+		<div class="m-0 p-0">
+		<table class="table table-sm table-hover">
+		  <tbody>
+		  {% for group in groupdata %}
+			<tr>
+				<th scope="col" class="text-left text-white h5 bg-secondary" colspan="2">{{group.category_name}}</th>
+				<th scope="col" class="text-left text-white  h5 bg-secondary" >Planned Quantity <span class="badge badge-primary">{{group.quantity}}</span></th>
+				<th scope="col" class="text-left text-white h5 bg-secondary" colspan="2">Quantity Bought <span class="badge badge-success">{{group.quantity_bought}}</span></th>
+				<th scope="col" class="text-left text-white h5 bg-secondary" colspan="2">Estimated Amount <span class="badge badge-danger">{{group.estimated_price}}</span></th>
+				<th scope="col" class="text-left text-white h5 bg-secondary" colspan="2">Amount Paid <span class="badge badge-danger">{{group.amount_paid}}</span></th>
+			</tr>
+
+			<tr>
+			  <th scope="row">No</th>
+			  <th scope="row">Shopping Date</th>
+			  <th scope="row">Shopping Item</th>
+			  <th scope="row">Shopping Quantity</th>
+			  <th scope="row">Estimated Price</th>
+			  <th scope="row">Quantity Bought</th>
+			  <th scope="row">Amount Paid</th>
+			  <th scope="row">Comment</th>
+			</tr>
+		  {% for d in data %}
+			{% if d.category_id_id == group.id %}
+			<tr class= {% if d.urgent == "yes" %} 'bg-warning' {%else%} "" {% endif %}>
+			  <th scope="row">{{forloop.counter}}</th>
+			  <td>{{d.item_date}} </td>
+			  <td>{{d.item_name}}
+				  {% if d.status == "completed" %}
+				  <span class="badge badge-success">{{d.status}}</span>
+				  {% elif d.status == "pending" %}
+				  <span class="badge badge-primary">{{d.status}}</span>
+				  {% else %}
+				  <span class="badge badge-danger">{{d.status}}</span>
+				  {% endif %}
+
+				  {% if d.urgent == "yes" %}
+				  <span class ="badge badge-danger"> Urgent</span>
+				  {% endif %}
+
+			  </td>
+			  <td>{{d.quantity}}</td>
+			  <td>{{d.estimated_price}}</td>
+			  <td>{{d.quantity_bought}}</td>
+			  <td>{{d.amount_paid}}</td>
+			  <td>{{d.comment}}</td>
+			  <td>
+				<a href="{%url 'bought_list' d.id%}" class="badge badge-success">view</a>
+				<a href="{%url 'update_shopping' d.id %}" class="badge badge-primary">update</a>
+				<a href="{%url 'delete_shopping' d.id %}" class="badge badge-danger">delete</a>
+			  </td>
+			</tr>
+		  {% endif %}
+		  {% endfor %}
+
+		  {% endfor %}
+
+		  </tbody>
+		</table>
+		</div> <!-- end card div -->
+	</div> <!-- end format div -->
+</div> <!-- end container fluid -->
+
+{% endblock content %}

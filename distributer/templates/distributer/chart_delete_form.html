@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{%block title %} Chart | Chart Delete Form{% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">CHARTS DELETE FORM</h3>
+<p class="text-danger"> Are you sure you want to delete the form!!!</p>
+<div>
+<form action="" method="post">
+    {% csrf_token %}
+	<div class="mb-3">
+		<ul class="list-group">
+            <li class="list-group-item">Chart Date: <span class="badge badge-primary">{{chart.chart_date}}</span></li>
+            <li class="list-group-item">Chart Name: <span class="badge badge-primary">{{chart.chart_name}}</span></li>
+            <li class="list-group-item">Chart Percentage: <span class="badge badge-primary">{{chart.perc}} %</span></li>
+            <li class="list-group-item">Priority: <span class="badge badge-primary">{{chart.priority}}</span></li>
+            <li class="list-group-item">Status: <span class="badge badge-primary">{{chart.status}}</span></li>
+          </ul>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" name="submit" value="delete" class="btn btn-danger" > Delete </button>
+            <button type="submit" name="submit" value="do_not_delete" class="btn btn-success" > Cancel </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+
+
+{% endblock %}

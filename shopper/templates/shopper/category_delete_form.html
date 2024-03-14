@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{%block title %} Shopper | Category Delete Form{% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">CATEGORY DELETE FORM</h3>
+<p class="text-danger"> Are you sure you want to delete the form!!!</p>
+<div>
+<form action="" method="post">
+    {% csrf_token %}
+	<div class="mb-3">
+		<ul class="list-group">
+            <li class="list-group-item">Chart Date: <span class="badge badge-primary">{{obj.category_name}}</span></li>
+
+          </ul>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" name="submit" value="delete" class="btn btn-danger" > Delete </button>
+            <button type="submit" name="submit" value="do_not_delete" class="btn btn-success" > Cancel </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{%block title %} Chart | Chart List{% endblock title %}
+{% block content %}
+    <h3 class="text-success font-weight-bold">CHARTS LIST</h3>
+    <p class="text-secondary"> Extra Money Distribution List</p>
+    {% if perc.allocate_percentage > 100 %}
+    <h3 class="alert alert-danger">Total Percentage is {{perc.allocate_percentage}}%</h3>
+    {% else %}
+    <h3 class="alert alert-success">Total Percentage is {{perc.allocate_percentage}}%</h3>
+    {% endif %}
+    <div>
+
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                  <th scope="col">Chart Date</th>
+                <th scope="col">Chart</th>
+                <th scope="col">Percentage</th>
+                <th scope="col">Status</th>
+                <th scope="col">Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for chart in chart_list %}
+              <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                <td>{{chart.chart_date}}</td>
+                <td>{{chart.chart_name}}</td>
+                <td>{{chart.perc}}%</td>
+                  <td>{{chart.status}}</td>
+                  <td>{{chart.priority}}</td>
+                <td>
+                    <a href="{%url 'chart_update' chart.id%}" class="badge badge-primary" >update</a>
+                    <a href="{%url 'chart_delete' chart.id%}" class="badge badge-danger" >delete</a>
+                </td>
+
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+    </div>
+
+{% endblock content %}

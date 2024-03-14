@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{%block title %} Tranfer | Update Form{% endblock title %}
+{% block content %}
+
+<h3 class="text-success font-weight-bold">TRANSFER FORM</h3>
+<p class="text-secondary"> Registration form for category used in extra money distribution.</p>
+<p> Chart Name: <span class="badge badge-primary">{{data.chart_name}}</span></p>
+<p> Date Transaction: <span class="badge badge-primary"> {{data.transact_date}}</span></p>
+<p>Allocated Amount: <span class="badge badge-success">{{data.allocated_amount}}</span></p>
+<p>Transferred Amount: <span class="badge badge-secondary">{{data.transferred_amount}}</span></p>
+<p>Remaining Amount: <span class="badge badge-danger">{{data.remaining_amount}}</span></p>
+
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="form-group col">
+			{% if form.transfer_date.errors %}
+			    <div class="alert alert-danger">{{form.transfer_date.errors}}</div>
+			{% endif %}
+			<label for="transfer_date" class="form-control-label">Transfer Date </label>
+			{{form.transfer_date}}
+		</div>
+    </div>
+    <div class="row">
+		<div class="form-group col">
+			{% if form.transfer_amount.errors %}
+			    <div class="alert alert-danger">{{form.transfer_amount.errors}}</div>
+			{% endif %}
+			<label for="transfer_amount" class="form-control-label"> Transfer Amount</label>
+            {{form.transfer_amount}}
+		</div>
+	</div> <!--  chart row-->
+    <div class="row">
+        <div class="form-group col">
+			{% if form.comment.errors %}
+			    <div class="alert alert-danger">{{form.comment.errors}}</div>
+			{% endif %}
+			<label for="comment" class="form-control-label">Comment</label>
+			{{form.comment}}
+		</div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" > Update </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+<script>
+	function validate_date(){
+		let date_elem = document.getElementById("id_transfer_date");
+		let entered_date = new Date(date_elem.value);
+		let transact_date = new Date("{{data.transact_date| date:'Y-m-d'}}");
+		if(entered_date < transact_date){
+			date_elem.value="";
+			alert("The Date Entered is before the Transacted Date!!!");
+
+		}
+	}
+
+</script>
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{%block title %} Chart | Chart Delete Form{% endblock title %}
+{% block content %}
+ <h3 class="text-success font-weight-bold">ALLOCATION DELETION FORM</h3>
+<p class="text-danger"> Are you sure you want to delete the form!!!</p>
+<div>
+<form action="" method="post">
+    {% csrf_token %}
+	<div class="mb-3">
+		<ul class="list-group">
+            <li class="list-group-item">Date of Allocation: <span>{{obj.allocate_date}}</span></li>
+            <li class="list-group-item">Chart: <span>{{obj.allocate_amount}}</span></li>
+            <li class="list-group-item">Amount: <span>{{obj.comment}}</span></li>
+          </ul>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-danger" name="submit" value="delete"> Delete </button>
+            <button type="submit" class="btn btn-success" name="submit" value="donotdelete"> Cancel </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{%block title %} Graph | Category List  {%endblock title %}
+{% block content %}
+<h1 class="text-center font-weight-bold"> SPENDING TRANSACTIONS FOR {{category}}</h1>
+<hr/>
+<div class="carousel">
+    <h3 class=" text-center font-weight-bold">Totals : <span class="badge badge-pill badge-primary">{{total}}</span></h3>
+    <h3 class="text-secondary text-center font-weight-bold">Period From: {{start_date}} To: {{end_date}} </h3>
+
+</div>
+
+<table class="table table-sm">
+    <tr class="">
+        <th>No</th>
+        <th>Spent Date</th>
+        <th>Day</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Reason</th>
+    </tr>
+  {% for spent in table_data %}
+    <tr>
+        <td>{{forloop.counter}}</td><td>{{spent.date}}</td>
+        <td>{{spent.date|date:'l'}}</td>
+        <td>{{spent.category}}</td><td>{{spent.amount}}</td>
+        <td>{{spent.comment}}</td>
+        <td><a class="badge badge-pill badge-primary" href="{%url 'update_spent' spent.id%}">update</a></td>
+    </tr>
+    {% endfor%}
+</table>
+{% endblock content %}

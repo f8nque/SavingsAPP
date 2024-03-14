@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{%block title %} Shopper | Update Shopping Item {% endblock title %}
+{% block content %}
+<h3 class="text-success font-weight-bold">SHOPPING ITEM FORM</h3>
+<p class="text-secondary"> Registration form into the  Shopping List.</p>
+<div>
+<form action="" method="post">
+	{% csrf_token %}
+	<div class="row">
+		<div class="form-group col">
+			{% if form.item_date.errors %}
+			    <div class="alert alert-danger">{{form.item_date.errors}}</div>
+			{% endif %}
+			<label for="item_date" class="form-control-label">Shopping Item Date </label>
+			{{form.item_date}}
+		</div>
+    </div>
+    <div class="row">
+		<div class="form-group col">
+			{% if form.item_name.errors %}
+			    <div class="alert alert-danger">{{form.item_name.errors}}</div>
+			{% endif %}
+			<label for="item_name" class="form-control-label"> Shopping Item Name</label>
+            {{form.item_name}}
+		</div>
+	</div> <!--  chart row-->
+    <div class="row">
+        <div class="form-group col">
+			{% if form.quantity.errors %}
+			    <div class="alert alert-danger">{{form.quantity.errors}}</div>
+			{% endif %}
+			<label for="quantity" class="form-control-label">Quantity</label>
+			{{form.quantity}}
+		</div>
+    </div>
+
+	<div class="row">
+        <div class="form-group col">
+			{% if form.estimated_price.errors %}
+			    <div class="alert alert-danger">{{form.estimated_price.errors}}</div>
+			{% endif %}
+			<label for="estimated_price" class="form-control-label"> Estimated Price</label>
+			{{form.estimated_price}}
+		</div>
+    </div>
+	<div class="row">
+        <div class="form-group col">
+			{% if form.status.errors %}
+			    <div class="alert alert-danger">{{form.status.errors}}</div>
+			{% endif %}
+			<label for="status" class="form-control-label"> Status</label>
+			{{form.status}}
+		</div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col">
+			{% if form.urgent.errors %}
+			    <div class="alert alert-danger">{{form.urgent.errors}}</div>
+			{% endif %}
+			<label for="status" class="form-control-label"> Urgent</label>
+			{{form.urgent}}
+		</div>
+    </div>
+
+	<div class="row">
+        <div class="form-group col">
+			{% if form.category_id.errors %}
+			    <div class="alert alert-danger">{{form.category_id.errors}}</div>
+			{% endif %}
+			<label for="category_id" class="form-control-label"> Category</label>
+			{{form.category_id}}
+		</div>
+    </div>
+
+
+  <div class="row">
+        <div class="form-group col">
+			{% if form.comment.errors %}
+			    <div class="alert alert-danger">{{form.comment.errors}}</div>
+			{% endif %}
+			<label for="comment" class="form-control-label"> Comment</label>
+			{{form.comment}}
+		</div>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-outline-primary" > Update </button>
+        </div>
+
+    </div>
+
+
+</form>
+
+</div>
+
+{% endblock content %}
