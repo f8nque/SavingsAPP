@@ -653,7 +653,7 @@ class AddBudgetItemView(LoginRequiredMixin,View):
                 record.amount = amount
                 record.user_id =user
                 record.save()
-                return redirect("budget_item_list")
+                return redirect("add_budget_item")
             else:
                 return render(request, self.template_name, {'form': form,'error':'Budget Item Already Exists'})
         else:
