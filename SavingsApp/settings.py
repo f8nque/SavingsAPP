@@ -25,7 +25,7 @@ SECRET_KEY = '4)z35ip(e)5tf1dh%38elk#bkt9ritrjucqfh&8%6m9iaw&kem'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['gachau.pythonanywhere.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'distributer',
     'shopper',
+    'planner',
 ]
 
 MIDDLEWARE = [

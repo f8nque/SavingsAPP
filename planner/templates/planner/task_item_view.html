@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{%block title %} Planner | Task Item View {% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+{% endblock head %}
+{% block content %}
+<div class="card">
+      <div class="card-header bg-info text-white">
+        <h5 class="card-title mb-0">Task Item Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Task Item Date:</h6>
+            <p>{{task_item.task_item_date}}</p>
+            <h6>Task Name:</h6>
+            <p>{{task_item.task.task_name}}</p>
+            <h6>Task Description:</h6>
+            <p>{{task_item.task.task_description}}</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Task Number:</h6>
+            <p>{{task_item.task_item_number}}</p>
+            <h6>Status:</h6>
+            <p>{{task_item.status}}</p>
+          </div>
+        </div>
+          <hr/>
+          <h6 class="text-secondary font-weight-bold">Task Item Description</h6>
+          <p>{{task_item.task_item_description}}</p>
+
+          <hr/>
+        <a type="submit" href="{%url 'pending_tasks'%}" class="btn btn-secondary">view list</a>
+
+      </div>
+    </div>
+  </div>
+
+
+{% endblock content %}

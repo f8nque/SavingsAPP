@@ -28,6 +28,7 @@ urlpatterns = [
     path('credits/',include('credits.urls')),
     path('allocate/',include('distributer.urls')),
     path('shopper/',include('shopper.urls')),
+    path('planner/',include('planner.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)

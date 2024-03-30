@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{%block title %} Planner | Create Task {% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+{% endblock head %}
+
+{% block content %}
+<h1>TASK ITEM CREATE FORM</h1>
+<hr/>
+
+<form>
+  <div class="form-group">
+    <label for="task_item_date">Task Item Date</label>
+    <input type="date" class="form-control" id="task_item_date">
+  </div>
+
+  <div class="form-group">
+    <label for="task">Task</label>
+    <select id ="task" name="name" class="form-control">
+      <option>Task 1</option>
+      <option>Task 2</option>
+      <option>Task 3</option>
+    </select>
+  </div>
+
+   <div class="form-group">
+    <label for="task_item_number">Task Item Number</label>
+    <input type="number" class="form-control" id="task_item_number">
+  </div>
+
+  <div class="form-group">
+    <label for="task_item_description">Task Item Description</label>
+    <input type="number" class="form-control" id="task_item_description">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Create Task Item</button>
+</form>
+
+{% endblock content %}

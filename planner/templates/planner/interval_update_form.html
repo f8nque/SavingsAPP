@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{%block title %} Planner | Update Interval {% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+{% endblock head %}
+
+{% block content %}
+<h1>INTERVAL UPDATE FORM</h1>
+<hr/>
+
+<form action="{%url 'update_interval' id%}" method="post">
+    {% csrf_token %}
+  <div class="form-group">
+    <label for="{{form.interval_name.id_for_html}}">Interval Name</label>
+     {{form.interval_name}}
+  </div>
+
+  <div class="form-group">
+    <label for="{{form.interval_description.id_for_html}}">Interval Description</label>
+    {{form.interval_description}}
+  </div>
+  <button type="submit" class="btn btn-primary">Update Interval</button>
+</form>
+
+{% endblock content %}

@@ -105,6 +105,18 @@
             <a class="dropdown-item" href="{%url 'add_budget_item'%}">Create Budget Item</a>
             <a class="dropdown-item" href="{%url 'budget_item_list' %}">Budget Item List</a>
         </div>
+
+    </div>
+        <div class="dropdown">
+         <a class="nav-item nav-link dropdown-toggle" data-toggle="dropdown"
+          id="plannerDropDown" aria-haspopup="true" aria-expanded="false"   href="#">Planner</a>
+        <div class="dropdown-menu" aria-labelledby="plannerDropDown">
+            <a class="dropdown-item" href="{% url 'task_create'%}">Create Task</a>
+            <a class="dropdown-item" href="{% url 'task_list'%}">Task List</a>
+            <hr/>
+            <a class="dropdown-item" href="{% url 'pending_tasks'%}">Pending Task</a>
+
+        </div>
     </div>
         <a class="nav-item nav-link ml-auto" href="{% url 'logout'%}">Logout</a>
 

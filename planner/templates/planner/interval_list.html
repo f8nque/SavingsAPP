@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{%block title %} Planner | Interval List {% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+{% endblock head %}
+
+{% block content %}
+<h1>Interval List</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Interval Name</th>
+      <th scope="col">Description</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for row in data %}
+    <tr>
+      <th scope="row">{{forloop.counter}}</th>
+      <td>{{row.interval_name}}</td>
+      <td>{{row.interval_description}}</td>
+      <td><a href="{%url 'update_interval' row.id%}" class="badge badge-success">update</a>
+        <a href="{%url 'delete_interval' row.id %}" class="badge badge-danger">delete</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% endblock content %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{%block title %} Planner | Delete Task {% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+{% endblock head %}
+
+{% block content %}
+<h1>Task Delete Form</h1>
+<form action="{%url 'task_delete' pk%}" method="post">
+    {% csrf_token %}
+    <ul class="list-group">
+        <li class="list-group-item">Task Date: {{task.task_date}}</li>
+      <li class="list-group-item">Task Name: {{task.task_name}}</li>
+      <li class="list-group-item">Task Description: {{task.task_description}}</li>
+        <li class="list-group-item">Interval: {{task.interval}}</li>
+      <li class="list-group-item">Start Date: {{task.start_date}}</li>
+        <li class="list-group-item">End Date: {{task.end_date}}</li>
+      <li class="list-group-item">Active: {{task.active}}</li>
+    </ul>
+    <div class="m-2">
+        <button type="submit" class="btn btn-primary" name="sub" value="delete">Delete</button> <button class="btn btn-danger" type="submit" name="sub" value="cancel">Cancel</button>
+    </div>
+
+</form>
+
+
+{% endblock content %}

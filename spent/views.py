@@ -17,6 +17,7 @@ from django.db import connection
 from django.conf import settings
 from .utils import TrackingDict
 import math
+from planner.utility import db_update
 # Create your views here.
 def index(request):
     return HttpResponse("Hello From Django")
@@ -965,6 +966,7 @@ class DailyListView(LoginRequiredMixin,View):
     login_url = settings.LOGIN_URL
     def get(self,request,*args,**kwargs):
         user = User.objects.get(username=self.request.user)
+        db_update(user.id)
         today =tz.now().date()
         week_start = today - datetime.timedelta(days=today.weekday())
         week_end = week_start + datetime.timedelta(days=6)

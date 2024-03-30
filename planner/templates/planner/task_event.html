@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{%block title %} Planner | Task List {% endblock title %}
+{% block head %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+{% endblock head %}
+
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Task Update</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form action="/" method="post" id="modalForm">
+              {% csrf_token %}
+              <div class="form-group">
+                <label for="myTextarea">Interval Description</label>
+                  <p id="modalTaskDate">Date: </p>
+                  <p id="modalTaskName">Task Name: </p>
+                  <p id="modalTaskDesc">Task Description: </p>
+                  <hr/>
+
+                  <p class="text-secondary text-center">Task Comment.</p>
+                  <textarea name="task_item_description" id="myTextarea" class="form-control">
+
+                  </textarea>
+
+              </div>
+              <button type="submit" class="btn btn-primary">Task Done</button>
+            </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<h1 class="text-center text-secondary">Pending Task Events</h1>
+<table class="table">
+  <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Date</th>
+        <th scope="col">Task Name</th>
+        <th scope="col">Task Description</th>
+        <th scope="col">Interval</th>
+        <th scope="col">#times</th>
+        <th scope="col">Status</th>
+        <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for daily_item in daily_data %}
+  <tr>
+      <td scope="row">{{forloop.counter}}</td>
+      <td name="dte">{{daily_item.task_item_date}}</td>
+      <td name="event_name">{{daily_item.task.task_name}}</td>
+      <td name="event_desc">{{daily_item.task.task_description}}</td>
+      <td>{{daily_item.task.interval}}</td>
+      <td class ="num_td" number="{{daily_item.task_item_number}}">{{daily_item.task_item_number}} of {{daily_item.task.times}}</td>
+      <td
+              {% if daily_item.status == 'not done' %}
+                      class="badge badge-danger"
+                 {% elif daily_item.status == 'pending' %}
+                     class="badge badge-warning"
+                {%else %}
+                     class="badge badge-success"
+                {% endif %}
+      >{{daily_item.status}}</td>
+
+      {% if daily_item.status == 'done' %}
+        <td><a href="{%url 'task_item' daily_item.id %}" class="badge badge-secondary">View</a></td>
+      {% else %}
+      <td><a href="#" data-toggle="modal" data-target="#updateModal" id="{{daily_item.id}}" class="viewModalBtn badge badge-info">Finalize</a></td>
+      {% endif %}
+  </tr>
+  {% endfor %}
+
+  {% for weekly_item in weekly_data %}
+  <tr>
+      <td scope="row">{{forloop.counter}}</td>
+      <td name="dte">{{weekly_item.task_item_date}}</td>
+      <td name="event_name">{{weekly_item.task.task_name}}</td>
+      <td name="event_desc">{{weekly_item.task.task_description}}</td>
+      <td>{{weekly_item.task.interval}}</td>
+      <td class ="num_td" number="{{weekly_item.task_item_number}}">{{weekly_item.task_item_number}} of {{weekly_item.task.times}}</td>
+      <td
+              {% if weekly_item.status == 'not done' %}
+                      class="badge badge-danger"
+                 {% elif weekly_item.status == 'pending' %}
+                     class="badge badge-warning"
+                {%else %}
+                     class="badge badge-success"
+                {% endif %}
+      >{{weekly_item.status}}</td>
+
+      {% if weekly_item.status == 'done' %}
+        <td><a href="{%url 'task_item' weekly_item.id %}" class="badge badge-secondary">View</a></td>
+      {% else %}
+      <td><a href="#" data-toggle="modal" data-target="#updateModal" id="{{weekly_item.id}}" class="viewModalBtn badge badge-info">Finalize</a></td>
+      {% endif %}
+  </tr>
+  {% endfor %}
+
+  {% for monthly_item in monthly_data %}
+  <tr>
+      <td scope="row">{{forloop.counter}}</td>
+      <td name="dte">{{monthly_item.task_item_date}}</td>
+      <td name="event_name">{{monthly_item.task.task_name}}</td>
+      <td name="event_desc">{{monthly_item.task.task_description}}</td>
+      <td>{{monthly_item.task.interval}}</td>
+      <td class ="num_td" number="{{monthly_item.task_item_number}}">{{monthly_item.task_item_number}} of {{monthly_item.task.times}}</td>
+      <td
+              {% if monthly_item.status == 'not done' %}
+                      class="badge badge-danger"
+                 {% elif monthly_item.status == 'pending' %}
+                     class="badge badge-warning"
+                {%else %}
+                     class="badge badge-success"
+                {% endif %}
+      >{{monthly_item.status}}</td>
+
+      {% if monthly_item.status == 'done' %}
+        <td><a href="{%url 'task_item' monthly_item.id %}" class="badge badge-secondary">View</a></td>
+      {% else %}
+      <td><a href="#" data-toggle="modal" data-target="#updateModal" id="{{monthly_item.id}}" class="viewModalBtn badge badge-info">Finalize</a></td>
+      {% endif %}
+  </tr>
+  {% endfor %}
+
+    {% for item in custom_data %}
+  <tr>
+      <td scope="row">{{forloop.counter}}</td>
+      <td name="dte">{{item.task_item_date}}</td>
+      <td name="event_name">{{item.task.task_name}}</td>
+      <td name="event_desc">{{item.task.task_description}}</td>
+      <td>{{item.task.interval}}</td>
+      <td class ="num_td" number="{{item.task_item_number}}">{{item.task_item_number}} of {{item.task.times}}</td>
+      <td
+              {% if item.status == 'not done' %}
+                      class="badge badge-danger"
+                 {% elif item.status == 'pending' %}
+                     class="badge badge-warning"
+                {%else %}
+                     class="badge badge-success"
+                {% endif %}
+      >{{item.status}}</td>
+
+      {% if item.status == 'done' %}
+        <td><a href="{%url 'task_item' item.id %}" class="badge badge-secondary">View</a></td>
+      {% else %}
+      <td><a href="#" data-toggle="modal" data-target="#updateModal" id="{{item.id}}" class="viewModalBtn badge badge-info">Finalize</a></td>
+      {% endif %}
+  </tr>
+  {% endfor %}
+
+
+  </tbody>
+
+</body>
+
+
+
+<script>
+    // Function to update modal content when "View Modal" link is clicked
+    document.querySelectorAll('.viewModalBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var row = this.closest('tr');
+            //var num_tasks = row.querySelector('.num_td').getAttribute('number');
+            var date = row.querySelector('[name="dte"]').textContent;
+            var eventName = row.querySelector('[name="event_name"]').textContent;
+            var eventDesc = row.querySelector('[name="event_desc"]').textContent;
+            var eventID = row.querySelector('.viewModalBtn').getAttribute('id');
+
+
+            // Update modal content
+            document.getElementById('modalTaskDate').textContent = "Task Date: " +date;
+            document.getElementById('modalTaskName').textContent = "Task Name: " +eventName;
+            document.getElementById('modalTaskDesc').textContent = "Task Description: " + eventDesc;
+            document.getElementById('modalForm').action ="/planner/posttaskitem/" + eventID
+        });
+    });
+
+    document.getElementById('myTextarea').addEventListener('focus', function() {
+        // Set the cursor position to the far left
+        this.setSelectionRange(0, 0);
+    });
+
+
+</script>
+{% endblock content %}
