@@ -184,7 +184,7 @@ class TaskItemListView(LoginRequiredMixin,View):
         db_update(user.id)  # check if there are any updates
         user = User.objects.get(username=self.request.user)
         daily_data = TaskItem.objects.filter(voided=0,task__interval = 'daily',user_id= user,task_item_date=today)
-        weekly_data = TaskItem.objects.filter( Q(status='pending') | Q(status='not done') |Q(status='done',task_item_date=today),
+        weekly_data = TaskItem.objects.filter(
                                             voided=0,
                                               task__interval='weekly',
                                               user_id=user,
