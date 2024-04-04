@@ -39,7 +39,7 @@ class TaskItem(models.Model):
     task = models.ForeignKey(Task,on_delete=models.CASCADE)
     task_item_number = models.IntegerField()
     choices = (('not done','not done'),('pending','pending'),('done','done'))
-    task_item_description = models.CharField(max_length=256,blank=True,null=True)
+    task_item_description = models.CharField(max_length=512,blank=True,null=True)
     status = models.CharField(max_length=28,choices=choices,default='not done')
     post_date = models.DateField(null=True,blank=True)
     user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
