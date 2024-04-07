@@ -14,6 +14,15 @@ class NotIn(In):
     def get_rhs_op(self, connection, rhs):
         return 'NOT' + connection.operators['in'] %rhs
 
+# class YearlyTheme(models.Model):
+#     year = models.DateField()
+#     theme = models.CharField(max_length=64)
+
+#     def __str__(self):
+#         return self.theme
+#     class Meta:
+#         ordering =["-year"]
+
 class BudgetCategory(models.Model):
     name = models.CharField(max_length=32)
     priority= models.IntegerField()
