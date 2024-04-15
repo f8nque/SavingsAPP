@@ -35,8 +35,36 @@
         <a type="submit" href="{%url 'pending_tasks'%}" class="btn btn-secondary">view list</a>
 
       </div>
-    </div>
+      <table class="table table-sm">
+      <thead class="table-head">
+        <th>Task Item Date</th>
+        <th>Task Number</th>
+        <th>Task Description</th>
+        <th>Task Status</th>
+      </thead>
+      <tbody>
+       {% for item in task_list %}
+       <tr>
+         <td>{{item.task_item_date}}</td>
+         <td>{{item.task_item_number}} of {{item.task.times}}</td>
+         <td>{{item.task_item_description}}</td>
+         <td
+         {% if item.status == 'not done' %}
+                      class="badge badge-danger"
+         {% elif daily_item.status == 'pending' %}
+                     class="badge badge-warning"
+         {%else %}
+             class="badge badge-success"
+         {% endif %}
+         >{{item.status}}</td>
+       </tr>
+
+      {% endfor %}
+      </tbody>
+    </table>
   </div>
+
+
 
 
 {% endblock content %}

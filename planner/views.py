@@ -206,4 +206,5 @@ class TaskItemListView(LoginRequiredMixin,View):
 class TaskItemView(LoginRequiredMixin,View):
     def get(self,request,pk):
         task_item = TaskItem.objects.get(pk=pk)
-        return render(request,'planner/task_item_view.html',{'task_item':task_item})
+        task_list =TaskItem.objects.filter(task=task_item.task).order_by('-task_item_date')
+        return render(request,'planner/task_item_view.html',{'task_item':task_item,'task_list':task_list})
