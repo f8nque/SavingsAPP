@@ -51,7 +51,7 @@
          <td
          {% if item.status == 'not done' %}
                       class="badge badge-danger"
-         {% elif daily_item.status == 'pending' %}
+         {% elif item.status == 'pending' %}
                      class="badge badge-warning"
          {%else %}
              class="badge badge-success"
