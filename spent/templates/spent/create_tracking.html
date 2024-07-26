@@ -14,18 +14,30 @@
     {% endfor %}
     </select>
     <input type="submit" class="btn btn-secondary" value="Generate trackings Category" name="tracks_submit">
-
 <a href="{%url 'create_track'%}">create new track</a>
-    <table>
+<br/>
+<label><input type="checkbox" id="checkAll" onclick="toggleCheckboxes(this)"> Check/Uncheck All</label>
+    <table class="table table-sm">
         {% for cat,val in categories.items %}
             {% if val.1 == 1 %}
-            <tr><td>{{cat}}</td><td><input type="checkbox" value="{{val.0}}" name="cat_list" checked></td></tr>
+            <tr><td>{{cat}}</td><td><input type="checkbox" class="checkbox" value="{{val.0}}" name="cat_list" checked></td></tr>
             {% else %}
-            <tr><td>{{cat}}</td><td><input type="checkbox" value="{{val.0}}" name="cat_list" ></td></tr>
+            <tr><td>{{cat}}</td><td><input type="checkbox" class="checkbox" value="{{val.0}}" name="cat_list" ></td></tr>
             {% endif %}
         {% endfor %}
     </table>
     <input type="submit" class="btn btn-success" value="Update the Tracking list" name="tracks_submit">
 
 </form>
+
+
+<script>
+    function toggleCheckboxes(source){
+        var btn = document.getElementById("checkall");
+        var checkboxes = document.querySelectorAll(".checkbox");
+        checkboxes.forEach(checkbox=>{
+            checkbox.checked = source.checked;
+        })
+    }
+</script>
 {% endblock content %}

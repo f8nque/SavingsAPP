@@ -475,7 +475,7 @@ class DebtAnalysisSummaryView(LoginRequiredMixin,View):
             from (
             select temp_debt_sum.month_id,temp_debt_sum.month,temp_debt_sum.year,sum(temp_debt_sum.amount) as amount_borrowed FROM
             (
-            select distinct
+            select
             case when cast(strftime('%m',c.credit_date) as INTEGER) = 1 then "January"
             when cast(strftime('%m',c.credit_date) as INTEGER) = 2 then "February"
             when cast(strftime('%m',c.credit_date) as INTEGER) = 3 then "March"
@@ -501,7 +501,7 @@ class DebtAnalysisSummaryView(LoginRequiredMixin,View):
 
             select serv_group.month,serv_group.year,sum(serv_group.amount_paid) as amount_paid
             from(
-            select distinct
+            select
             case when cast(strftime('%m',serv_temp.credit_date) as INTEGER) = 1 then "January"
             when cast(strftime('%m',serv_temp.credit_date) as INTEGER) = 2 then "February"
             when cast(strftime('%m',serv_temp.credit_date) as INTEGER) = 3 then "March"
@@ -659,7 +659,7 @@ class DebtAnalysisSummaryView(LoginRequiredMixin,View):
             from (
             select temp_debt_sum.month_id,temp_debt_sum.month,temp_debt_sum.year,sum(temp_debt_sum.amount) as amount_borrowed FROM
             (
-            select distinct
+            select
             case when cast(strftime('%m',c.credit_date) as INTEGER) = 1 then "January"
             when cast(strftime('%m',c.credit_date) as INTEGER) = 2 then "February"
             when cast(strftime('%m',c.credit_date) as INTEGER) = 3 then "March"
@@ -685,7 +685,7 @@ class DebtAnalysisSummaryView(LoginRequiredMixin,View):
 
             select serv_group.month,serv_group.year,sum(serv_group.amount_paid) as amount_paid
             from(
-            select distinct
+            select
             case when cast(strftime('%m',serv_temp.credit_date) as INTEGER) = 1 then "January"
             when cast(strftime('%m',serv_temp.credit_date) as INTEGER) = 2 then "February"
             when cast(strftime('%m',serv_temp.credit_date) as INTEGER) = 3 then "March"
@@ -718,7 +718,7 @@ class DebtAnalysisSummaryView(LoginRequiredMixin,View):
             monthly_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
         with connection.cursor() as cursor:
             cursor.execute(f"""
-                    select distinct
+                    select
                     cast(strftime('%m',c.credit_date) as INTEGER) as id,
                     case when cast(strftime('%m',c.credit_date) as INTEGER) = 1 then "January"
                     when cast(strftime('%m',c.credit_date) as INTEGER) = 2 then "February"
