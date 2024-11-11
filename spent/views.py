@@ -1236,16 +1236,16 @@ class CreateTrackingView(LoginRequiredMixin,View):
             ids = request.POST.getlist('cat_list')
             for id in ids: #use all checked boxes in the create_tracking template
                 c=Category.objects.get(pk=id) # all the
-                if(len(Tracker.objects.filter(track_id=track,category_id=c,voided=0))==0): #check for dublicate
+                if(len(Tracker.objects.filter(track_id=track,category_id=c))==0): #check for dublicate
                     tracker = Tracker()
                     tracker.category_id = c
                     tracker.user_id=user
                     tracker.track_id = track
                     tracker.save()
-                elif(len(Tracker.objects.filter(track_id=track,category_id=c,voided=1))> 0): #this may blow up
-                    tracker = Tracker.objects.get(track_id=track,category_id=c,voided=1)
-                    tracker.voided=0
-                    tracker.save()
+                #elif(len(Tracker.objects.filter(track_id=track,category_id=c,voided=1))> 0): #this may blow up
+                #    tracker = Tracker.objects.get(track_id=track,category_id=c,voided=1)
+                #    tracker.voided=0 # we dont need this
+                #    tracker.save()
 
             trackers = Tracker.objects.filter(track_id=track_id)
             trackers.update(voided=1)
@@ -1553,6 +1553,10 @@ class BudgetEstimationView(LoginRequiredMixin,View):
         current_budget.budget_amount as ba,
         current_budget.budget_spent as bs,
         current_budget.budget_deficit as bd,
+
+    	case when spent_specified.spent_stddev is NULL then 0
+            else spent_specified.spent_stddev  end as specified_period_stddev,
+
         case when spent_specified.amount_spent is NULL then 0
         else spent_specified.amount_spent  end as specified_period_spent,
         case when  spent_specified.month_estimate is NULL then 0
@@ -1618,22 +1622,56 @@ class BudgetEstimationView(LoginRequiredMixin,View):
         select
                 final.budget_category_id,
                 final.amount_spent,
+                final.spent_stddev,
                 final.amount_spent/{days_between} as daily_estimate,
                 final.amount_spent/{days_between} *{month_days} as month_estimate
                 from (
-                select distinct sum(cat.amount) as amount_spent,
-                cat.budget_category_id
-                from (
-                select s.date,
-                s.amount,
-                c.budget_category_id
-                 from spent_spent s
-                 inner join spent_category c on s.category_id_id = c.id
-        		 where s.date between "{start_date}" and "{end_date}"
-        		 and s.voided=0 and s.user_id_id = {user.id}
-                 ) cat
-                group by cat.budget_category_id) final
-                order by final.amount_spent desc
+            	SELECT DISTINCT
+                SUM(cat.amount) AS amount_spent,
+                cat.budget_category_id,
+                ROUND(
+                    SQRT(
+                        SUM((cat.amount - (SELECT AVG(inner_cat.amount)
+                                           FROM (
+                                                SELECT s.amount
+                                                FROM spent_spent s
+                                                INNER JOIN spent_category c
+                                                ON s.category_id_id = c.id
+                                                WHERE s.date BETWEEN "{start_date}" and "{end_date}"
+                                                  AND s.voided = 0
+                                                  AND s.user_id_id = {user.id}
+                                                  AND c.budget_category_id = cat.budget_category_id
+                                           ) AS inner_cat)) *
+                            (cat.amount - (SELECT AVG(inner_cat.amount)
+                                           FROM (
+                                                SELECT s.amount
+                                                FROM spent_spent s
+                                                INNER JOIN spent_category c
+                                                ON s.category_id_id = c.id
+                                                WHERE s.date BETWEEN "{start_date}" and "{end_date}"
+                                                  AND s.voided = 0
+                                                  AND s.user_id_id = {user.id}
+                                                  AND c.budget_category_id = cat.budget_category_id
+                                           ) AS inner_cat))
+                        ) /
+                        (COUNT(cat.amount) - 1)
+                    ), 2
+                ) AS spent_stddev
+            FROM (
+                SELECT
+                    s.date,
+                    s.amount,
+                    c.budget_category_id
+                FROM spent_spent s
+                INNER JOIN spent_category c ON s.category_id_id = c.id
+                WHERE s.date BETWEEN "{start_date}" and "{end_date}"
+                  AND s.voided = 0
+                  AND s.user_id_id = {user.id}
+            ) cat
+            GROUP BY cat.budget_category_id
+
+            		) final
+                            order by final.amount_spent desc
 
 
         )spent_specified on  current_budget.budget_category_id = spent_specified.budget_category_id
@@ -1672,6 +1710,11 @@ class BudgetEstimationView(LoginRequiredMixin,View):
         current_budget.budget_amount as ba,
         current_budget.budget_spent as bs,
         current_budget.budget_deficit as bd,
+
+
+    	case when spent_specified.spent_stddev is NULL then 0
+            else spent_specified.spent_stddev  end as specified_period_stddev,
+
         case when spent_specified.amount_spent is NULL then 0
         else spent_specified.amount_spent  end as specified_period_spent,
         case when  spent_specified.month_estimate is NULL then 0
@@ -1737,26 +1780,64 @@ class BudgetEstimationView(LoginRequiredMixin,View):
         select
                 final.budget_category_id,
                 final.amount_spent,
+                final.spent_stddev,
                 final.amount_spent/{days_between} as daily_estimate,
                 final.amount_spent/{days_between} *{month_days} as month_estimate
                 from (
-                select distinct sum(cat.amount) as amount_spent,
-                cat.budget_category_id
-                from (
-                select s.date,
-                s.amount,
-                c.budget_category_id
-                 from spent_spent s
-                 inner join spent_category c on s.category_id_id = c.id
-        		 where s.date between "{start_date}" and "{end_date}"
-        		 and s.voided=0 and s.user_id_id = {user.id}
-                 ) cat
-                group by cat.budget_category_id) final
-                order by final.amount_spent desc
+            	SELECT DISTINCT
+                SUM(cat.amount) AS amount_spent,
+                cat.budget_category_id,
+                ROUND(
+                    SQRT(
+                        SUM((cat.amount - (SELECT AVG(inner_cat.amount)
+                                           FROM (
+                                                SELECT s.amount
+                                                FROM spent_spent s
+                                                INNER JOIN spent_category c
+                                                ON s.category_id_id = c.id
+                                                WHERE s.date BETWEEN "{start_date}" and "{end_date}"
+                                                  AND s.voided = 0
+                                                  AND s.user_id_id = {user.id}
+                                                  AND c.budget_category_id = cat.budget_category_id
+                                           ) AS inner_cat)) *
+                            (cat.amount - (SELECT AVG(inner_cat.amount)
+                                           FROM (
+                                                SELECT s.amount
+                                                FROM spent_spent s
+                                                INNER JOIN spent_category c
+                                                ON s.category_id_id = c.id
+                                                WHERE s.date BETWEEN "{start_date}" and "{end_date}"
+                                                  AND s.voided = 0
+                                                  AND s.user_id_id = {user.id}
+                                                  AND c.budget_category_id = cat.budget_category_id
+                                           ) AS inner_cat))
+                        ) /
+                        (COUNT(cat.amount) - 1)
+                    ), 2
+                ) AS spent_stddev
+            FROM (
+                SELECT
+                    s.date,
+                    s.amount,
+                    c.budget_category_id
+                FROM spent_spent s
+                INNER JOIN spent_category c ON s.category_id_id = c.id
+                WHERE s.date BETWEEN "{start_date}" and "{end_date}"
+                  AND s.voided = 0
+                  AND s.user_id_id = {user.id}
+            ) cat
+            GROUP BY cat.budget_category_id
+
+            		) final
+                            order by final.amount_spent desc
 
 
         )spent_specified on  current_budget.budget_category_id = spent_specified.budget_category_id
         order by current_budget.budget_amount desc
+
+
+
+
          """
         with connection.cursor() as cursor:
             cursor.execute(sql)
@@ -1921,7 +2002,7 @@ class BudgetPerformanceView(LoginRequiredMixin,View):
                 inner join spent_track t on b.track_id_id = t.id
                 where b.user_id_id = 1 and t.voided =0
                 order by t.start_date desc
-                limit 15
+                limit 24
             """)
             columns = [col[0] for col in cursor.description]
             budget_list = [dict(zip(columns,row)) for row in cursor.fetchall()]

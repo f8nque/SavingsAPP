@@ -47,7 +47,7 @@
                     href="https://gachau.pythonanywhere.com/categoryselection/{{start_date|date:'Y-m-d'}}/{{end_date|date:'Y-m-d'}}/{{data.category}}/">
                         {{data.category}}</a></td>
                     <td>{{data.specified_period_spent}}</td>
-                    <td>{{data.current_month_estimate}}</td>
+                    <td>{{data.current_month_estimate}} +/- <span class="text-secondary">{{data.specified_period_stddev}}</span></td>
                     <td> {{data.ba}} |
                     {% if data.budget_minus_estimate < 0 %}
                     <span class="badge badge-danger">({{data.budget_minus_estimate}})</span>
