@@ -48,6 +48,9 @@ urlpatterns = [
     path('amortizedbudgetestimate/',views.AmortizedBudgetEstimatesView.as_view(),name='amortized'),
     path('budgetperformance/',views.BudgetPerformanceView.as_view(),name='budget_performance'),
     path('weeklyanalysis/',views.WeeklyAnalysisView.as_view(),name='weekly_analysis'),
+    path('weeklysavings/',views.WeeklyBudgetSavingsView.as_view(),name='weekly_savings'),
+    path('createsavingstracking/',views.CreateSavingsTrackingView.as_view(),name="create_savings_tracking"),
+
 
 
 

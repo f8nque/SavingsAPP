@@ -23,6 +23,13 @@ class NotIn(In):
 #     class Meta:
 #         ordering =["-year"]
 
+
+from django.db import models
+
+
+
+
+
 class BudgetCategory(models.Model):
     name = models.CharField(max_length=32)
     priority= models.IntegerField()
@@ -163,9 +170,35 @@ class SavingsTracker(models.Model):
         ordering =["-date_created"]
 
 # Create your models here
+class WeeklySavingsTracker(models.Model):
+    category_id = models.ForeignKey(BudgetClassItem, on_delete=models.CASCADE)
+    voided = models.IntegerField(default=0)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    track_id = models.ForeignKey(Track, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return f"{self.category_id}-{self.user_id}--{self.track_id}"
 
 
-
-
+class SpentWeekBudget(models.Model):
+    budget_id = models.ForeignKey(Budget,on_delete=models.CASCADE)
+    budget_category_id = models.ForeignKey(BudgetClassItem,on_delete=models.CASCADE)
+    week_start = models.DateField()
+    week_end = models.DateField()
+    budget_amount = models.FloatField(null=True,blank=True)
+    budget_spent_start = models.FloatField(null=True,blank=True)
+    week_budget = models.FloatField(null=True,blank=True)
+    week_spent = models.FloatField(null=True,blank=True)
+    week_remaining = models.FloatField(null=True,blank=True)
+    bf = models.BooleanField(default=False)
+    saved = models.BooleanField(default=False)
+    amount_bf = models.FloatField(null=True, blank=True)
+    amount_saved = models.FloatField(null=True, blank=True)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    locked = models.BooleanField(default=False)
+    voided = models.BooleanField(default=False)
+    class Meta:
+        db_table = 'spent_week_budget'  # Matches the table name in SQLite
 
 # Create your models here.

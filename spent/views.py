@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.views.generic.list import ListView
 from django.http import HttpResponse
 from .forms import CategoryForm,SpentForm,TrackForm,TrackingForm,BudgetCategoryForm,BudgetForm,BudgetClassItemForm,BudgetItemForm,UpdateCategoryForm
-from .models import Spent,Category,SavingsTracker,Tracker,Track,Tracking,NotIn,BudgetCategory,Budget,BudgetItem,BudgetClassItem,BudgetLog
+from .models import Spent,Category,SavingsTracker,Tracker,Track,Tracking,NotIn,BudgetCategory,Budget,BudgetItem,BudgetClassItem,BudgetLog,WeeklySavingsTracker,SpentWeekBudget
 from django.views import View
 import datetime
 import calendar
@@ -18,9 +18,44 @@ from django.conf import settings
 from .utils import TrackingDict
 import math
 from planner.utility import db_update
+from .queries import weekly_saving_data_query
 # Create your views here.
 def index(request):
     return HttpResponse("Hello From Django")
+
+class WeeklyBudgetSavingsView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = User.objects.get(username=self.request.user)
+        today = datetime.datetime.now().date()
+        week_start= today - datetime.timedelta(days=today.weekday())
+        week_end = week_start + datetime.timedelta(days=6)
+        day_prior_week = week_start - datetime.timedelta(days=1)
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+            select distinct strftime('%Y-%m-%d',a.week_start) as week_start,strftime('%Y-%m-%d',a.week_end) as week_end from spent_week_budget a
+            where a.voided = 0 and a.user_id_id = {user.id} order by a.week_start desc
+            """)
+            columns = [col[0] for col in cursor.description]
+            filter_list = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        weekly_savings = SpentWeekBudget.objects.filter(week_start=week_start,week_end=week_end,voided=0,user_id=user)
+        return render(request,"spent/week_budget_savings.html",{'weekly_savings':weekly_savings,'filter_list':filter_list})
+    def post(self,request):
+        user = User.objects.get(username=self.request.user)
+        week_filter = request.POST['week_select']
+        week_start,week_end = week_filter.split(":")
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+                    select
+                    distinct strftime('%Y-%m-%d',a.week_start) as week_start,strftime('%Y-%m-%d',a.week_end) as week_end
+                     from spent_week_budget a
+                    where a.voided = 0 and a.user_id_id={user.id} order by a.week_start desc
+                    """)
+            columns = [col[0] for col in cursor.description]
+            filter_list = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        weekly_savings = SpentWeekBudget.objects.filter(week_start=week_start,week_end=week_end,voided=0)
+        return render(request,"spent/week_budget_savings.html",{'weekly_savings':weekly_savings,'filter_list':filter_list})
 class BudgetCategoryView(LoginRequiredMixin,View):
     template_name = "spent/budget_category.html"
     form_class = BudgetCategoryForm
@@ -873,6 +908,10 @@ class AddSpentView(LoginRequiredMixin,View):
         return render(request,self.template_name,{'form':form})
     def post(self,request,*args,**kwargs):
         user = User.objects.get(username=self.request.user) #gets the current logged in user
+        today = datetime.datetime.now().date() # useful for weekly savings
+        week_start = today - datetime.timedelta(days=today.weekday())  # useful for weekly savings
+        week_end = week_start + datetime.timedelta(days=6)  # useful for weekly savings
+
         form = SpentForm(user,request.POST)
         if form.is_valid():
             date= form.cleaned_data['date']
@@ -908,7 +947,13 @@ class AddSpentView(LoginRequiredMixin,View):
                     savings.spent_id = Spent.objects.get(pk=result.id) #update the spent record id
                     savings.user_id=user_id
                     savings.save()
-
+                # Create or Update Weekly update.
+                with connection.cursor() as cursor:
+                    cursor.execute(weekly_saving_data_query(today,week_start,week_end,user))
+                    columns = [col[0] for col in cursor.description]
+                    weekly_savings = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                    #call update method
+                create_update_weekly_savings(weekly_savings) #update/create weekly savings
             else:
                 return HttpResponse("You have already spent that item, do you wish to update the item???")
             return redirect("daily_list")
@@ -2127,3 +2172,105 @@ class WeeklyAnalysisView(LoginRequiredMixin,View):
 
         return render(request,"spent/weekly_analysis.html",{'weekly_list':weekly_list,'quarter_start':quarter_start_date,'quarter_end':quarter_end_date})
 
+class CreateSavingsTrackingView(LoginRequiredMixin,View):
+    login_url = settings.LOGIN_URL
+    def get(self,request,*args,**kwargs):
+        user = User.objects.get(username=self.request.user)
+        choices = Track.objects.filter(user_id=user).values_list('id', 'start_date')
+        return render(request,"spent/create_savings_tracking.html",{"select_values":choices})
+
+    def post(self,request,*args,**kwargs):
+        track_id = None
+        val = request.POST['tracks_submit'] # the value of button pressed
+        user = User.objects.get(username=self.request.user)
+        trackDict = TrackingDict()
+        track_id = request.POST['tracks']
+        choices = Track.objects.filter(user_id=user).values_list('id', 'start_date')
+        if val == "Generate trackings Category":
+            all_category = BudgetClassItem.objects.filter(user_id=user,voided=0).values('id','name')
+            track = Track.objects.get(pk=track_id)
+            tracker = WeeklySavingsTracker.objects.filter(track_id=track,voided=0)
+            for x in all_category:
+                trackDict.addCategory(x['name'],x['id'])
+            for cat in tracker:
+                if cat.category_id.name in trackDict.get_tracking_list():
+                    trackDict.updateCategory(cat.category_id.name)
+            return render(request,"spent/create_savings_tracking.html",{"select_values":choices,"categories":trackDict.get_tracking_list()})
+
+
+        if val == "Update the Tracking list":
+            track_id = request.POST['tracks']
+            track = Track.objects.get(pk=track_id) #get the Track instance to add to Tracker
+            ids = request.POST.getlist('cat_list')
+            for id in ids: #use all checked boxes in the create_tracking template
+                c=BudgetClassItem.objects.get(pk=id) # all the
+                if(len(WeeklySavingsTracker.objects.filter(track_id=track,category_id=c))==0): #check for dublicate
+                    tracker = WeeklySavingsTracker()
+                    tracker.category_id = c
+                    tracker.user_id=user
+                    tracker.track_id = track
+                    tracker.save()
+                #elif(len(Tracker.objects.filter(track_id=track,category_id=c,voided=1))> 0): #this may blow up
+                #    tracker = Tracker.objects.get(track_id=track,category_id=c,voided=1)
+                #    tracker.voided=0 # we dont need this
+                #    tracker.save()
+
+            trackers = WeeklySavingsTracker.objects.filter(track_id=track_id)
+            trackers.update(voided=1)
+            ### void all the Trackers and then unvoid all the selected inorder to use the in
+            WeeklySavingsTracker.objects.filter(track_id=track_id,category_id__in=ids).update(voided=0)
+
+            # Laststep
+            all_category = BudgetClassItem.objects.filter(user_id=user, voided=0)
+            for x in all_category:
+                trackDict.addCategory(x.name, x.id)
+            for cat in trackers:
+                trackDict.updateCategory(cat.category_id.name)
+            return render(request, "spent/create_savings_tracking.html",
+                          {"select_values": choices, "categories": trackDict.get_tracking_list()})
+        return render(request, "spent/create_savings_tracking.html", {"select_values": choices})
+
+
+
+#utils functions
+def create_update_weekly_savings(data):
+    for item in data:
+        budget_id = item['budget_id']
+        budget_category_id = item['budget_category_id']
+        week_start = item['week_start']
+        week_end = item['week_end']
+        budget_amount= item['budget_amount']
+        budget_spent_start = item['spent_at_start_this_week']
+        week_budget = item['week_budget']
+        week_spent = item['spent_this_week']
+        week_remaining = item['week_remaining']
+
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+            select *
+            from spent_week_budget a
+            where a.budget_id_id={budget_id} and a.budget_category_id_id = {budget_category_id}
+            and a.week_start='{week_start}' and a.week_end='{week_end}'
+            """)
+            columns = [col[0] for col in cursor.description]
+            savings_list = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        if len(savings_list) > 0 :
+            spent_obj = SpentWeekBudget.objects.get(pk=savings_list[0]['id'])
+            spent_obj.budget_amount=budget_amount
+            spent_obj.budget_spent_start=budget_spent_start
+            spent_obj.week_budget=week_budget
+            spent_obj.week_spent=week_spent
+            spent_obj.week_remaining=week_remaining
+            spent_obj.save()
+        else:
+            new_spent_obj = SpentWeekBudget()
+            new_spent_obj.budget_id = Budget.objects.get(pk=budget_id)
+            new_spent_obj.budget_category_id = BudgetClassItem.objects.get(pk=budget_category_id)
+            new_spent_obj.week_start = week_start
+            new_spent_obj.week_end = week_end
+            new_spent_obj.budget_amount = budget_amount
+            new_spent_obj.budget_spent_start = budget_spent_start
+            new_spent_obj.week_budget = week_budget
+            new_spent_obj.week_spent = week_spent
+            new_spent_obj.week_remaining = week_remaining
+            new_spent_obj.save()

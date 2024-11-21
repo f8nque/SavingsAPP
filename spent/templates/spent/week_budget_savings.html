@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{%block title %} Savings | Weekly Budget Savings{% endblock title %}
+
+{% block content %}
+
+
+<h1 class="text-center text-primary">Spent Week Budget</h1>
+<div>
+      <form action="#" method="post">
+        {% csrf_token %}
+                <div class="form-group">
+                    <label for="week">Select: Budget Week</label>
+                    <select class="form-control" id="week" name="week_select">
+                      {% for week in filter_list %}
+                        <option value="{{week.week_start}}:{{week.week_end}}">{{week.week_start}}<--->{{week.week_end}}</option>
+                      {% endfor %}
+
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+</div>
+
+    <table class="table table-sm">
+      <thead class="table-head">
+        <tr>
+          <th>Budget</th>
+          <th>Category</th>
+          <th>Week Start</th>
+          <th>Week End</th>
+          <th>Budget Amount</th>
+          <th>Spent Start</th>
+          <th>Week Budget</th>
+          <th>Week Spent</th>
+          <th>Def/Sup</th>
+          <th>Amt BF</th>
+          <th>Amt Saved</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody class="table-body">
+      {% for obj in weekly_savings %}
+        <tr>
+          <td>{{obj.budget_id.name}}</td>
+          <td>{{obj.budget_category_id.name}}</td>
+          <td>{{obj.week_start}}</td>
+          <td>{{obj.week_end}}</td>
+          <td>{{obj.budget_amount}}</td>
+          <td>{{obj.budget_spent_start}}</td>
+          <td>{{obj.week_budget}}</td>
+          <td>{{obj.week_spent}}</td>
+          <td>{{obj.week_remaining}}</td>
+          <td>{{obj.amount_bf}}</td>
+          <td>{{obj.amount_saved}}</td>
+          <td>
+            <button class="badge badge-pill badge-success" data-toggle="modal" data-target="#weekBudgetModal">Action</button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="weekBudgetModal" tabindex="-1" role="dialog" aria-labelledby="weekBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="weekBudgetModalLabel">Transfer Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="weekBudgetForm">
+            <div class="form-group">
+              <label for="weekStart">Week Start : November 11, 2024</label>
+            </div>
+            <div class="form-group">
+              <label for="weekEnd">Week End: November 11, 2024 </label>
+            </div>
+            <div class="form-group">
+              <label for="weekRemaining">Week Remaining: 5000</label>
+            </div>
+            <div class="form-group">
+              <label for="amountSaved">Amount Saved</label>
+              <input type="number" class="form-control" id="amountSaved" name="amountSaved">
+            </div>
+            <div class="form-group">
+              <label for="amountBf">Amount BF</label>
+              <input type="number" class="form-control" id="amountBf" name="amountBf" readonly>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="calculateAmountBF()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function calculateAmountBF() {
+      const weekRemaining = parseFloat(document.getElementById('weekRemaining').value) || 0;
+      const amountSaved = parseFloat(document.getElementById('amountSaved').value) || 0;
+      const amountBf = weekRemaining - amountSaved;
+      document.getElementById('amountBf').value = amountBf.toFixed(2);
+    }
+  </script>
+
+{% endblock content %}

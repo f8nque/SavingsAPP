@@ -2,6 +2,7 @@ import uuid
 import pandas as pd
 import datetime as dt
 from django.db import connection
+#from .models import SpentWeekBudget
 
 
 def generateUUID():
