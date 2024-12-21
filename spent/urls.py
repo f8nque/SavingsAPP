@@ -50,6 +50,7 @@ urlpatterns = [
     path('weeklyanalysis/',views.WeeklyAnalysisView.as_view(),name='weekly_analysis'),
     path('weeklysavings/',views.WeeklyBudgetSavingsView.as_view(),name='weekly_savings'),
     path('createsavingstracking/',views.CreateSavingsTrackingView.as_view(),name="create_savings_tracking"),
+    path('updateweeksurplus/',views.UpdateWeeklySurplusView.as_view(),name="update_week_surplus"),
 
 
 

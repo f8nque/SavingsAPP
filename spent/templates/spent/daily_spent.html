@@ -5,6 +5,9 @@
 <hr/>
 <div class="carousel">
     <h3 class="text-primary text-center font-weight-bold">Totals : <span class="badge badge-pill badge-primary">{{totals}}</span></h3>
+    <h5 class="text-info text-center font-weight-bold">Amount Spent so far : <span class="badge badge-pill badge-secondary">{{amount_spent}}/{{track_amount}}</span>
+    Estimated Daily limits : <span class="badge badge-pill badge-secondary">{{daily_estimate}}</span>
+    </h5>
     <h4 class="text-center text-secondary">Total Debt Owed <a class="badge badge-pill badge-danger" href="{% url 'debt_list'%}">{{debt}}</a></h4>
     {% if totals > daily_limit %}
     <div class="alert alert-danger">

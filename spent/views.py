@@ -32,29 +32,62 @@ class WeeklyBudgetSavingsView(LoginRequiredMixin,View):
         day_prior_week = week_start - datetime.timedelta(days=1)
         with connection.cursor() as cursor:
             cursor.execute(f"""
-            select distinct strftime('%Y-%m-%d',a.week_start) as week_start,strftime('%Y-%m-%d',a.week_end) as week_end from spent_week_budget a
-            where a.voided = 0 and a.user_id_id = {user.id} order by a.week_start desc
+            select distinct a.budget_id_id,strftime('%Y-%m-%d',a.week_start) as week_start,strftime('%Y-%m-%d',a.week_end) as week_end from spent_week_budget a
+            where a.voided = 0 and a.user_id_id = {user.id} order by a.budget_id_id desc ,a.week_start desc
             """)
             columns = [col[0] for col in cursor.description]
             filter_list = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+            with cum as (SELECT swb.budget_id_id,swb.budget_category_id_id, sum(IFNULL(swb.amount_saved,0)) as budget_saved
+            FROM spent_week_budget swb
+            where swb.budget_id_id =(select budget_id_id from spent_week_budget where week_start='{week_start}' and week_end = '{week_end}' order by budget_id_id desc limit 1)
+            and swb.week_end <= '{today}'
+            group by swb.budget_category_id_id)
 
-        weekly_savings = SpentWeekBudget.objects.filter(week_start=week_start,week_end=week_end,voided=0,user_id=user)
+            select c.name as budget_name,d.name as budget_category,a.*,b.budget_saved from
+            spent_week_budget a
+            inner join spent_budget c on a.budget_id_id = c.id
+            inner join spent_budgetclassitem d on a.budget_category_id_id = d.id
+            left outer join cum b on a.budget_id_id = b.budget_id_id and a.budget_category_id_id = b.budget_category_id_id
+            where a.week_start='{week_start}' and a.week_end = '{week_end}'
+            and a.voided =0 and a.user_id_id = {user.id} and
+            a.budget_id_id = (select budget_id_id from spent_week_budget where week_start='{week_start}' and week_end = '{week_end}' order by budget_id_id desc limit 1)
+            """)
+            columns = [col[0] for col in cursor.description]
+            weekly_savings = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return render(request,"spent/week_budget_savings.html",{'weekly_savings':weekly_savings,'filter_list':filter_list})
     def post(self,request):
         user = User.objects.get(username=self.request.user)
         week_filter = request.POST['week_select']
-        week_start,week_end = week_filter.split(":")
+        budget_id,week_start,week_end = week_filter.split(":")
         with connection.cursor() as cursor:
             cursor.execute(f"""
-                    select
-                    distinct strftime('%Y-%m-%d',a.week_start) as week_start,strftime('%Y-%m-%d',a.week_end) as week_end
-                     from spent_week_budget a
-                    where a.voided = 0 and a.user_id_id={user.id} order by a.week_start desc
+                    select distinct a.budget_id_id,strftime('%Y-%m-%d',a.week_start) as week_start,
+                    strftime('%Y-%m-%d',a.week_end) as week_end from spent_week_budget a
+                    where a.voided = 0 and a.user_id_id = {user.id} order by a.budget_id_id desc ,a.week_start desc
                     """)
             columns = [col[0] for col in cursor.description]
             filter_list = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+                with cum as (SELECT swb.budget_id_id,swb.budget_category_id_id, sum(IFNULL(swb.amount_saved,0)) as budget_saved
+                FROM spent_week_budget swb
+                where swb.budget_id_id = {budget_id}
+                and swb.week_end <= '{week_end}'
+                group by swb.budget_category_id_id)
 
-        weekly_savings = SpentWeekBudget.objects.filter(week_start=week_start,week_end=week_end,voided=0)
+                select c.name as budget_name,d.name as budget_category,a.*,b.budget_saved from
+                spent_week_budget a
+                inner join spent_budget c on a.budget_id_id = c.id
+                inner join spent_budgetclassitem d on a.budget_category_id_id = d.id
+                left outer join cum b on a.budget_id_id = b.budget_id_id and a.budget_category_id_id = b.budget_category_id_id
+                where a.week_start='{week_start}' and a.week_end = '{week_end}'
+                and a.budget_id_id = {budget_id}
+                and a.voided =0 and a.user_id_id = {user.id}
+                """)
+            columns = [col[0] for col in cursor.description]
+            weekly_savings = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return render(request,"spent/week_budget_savings.html",{'weekly_savings':weekly_savings,'filter_list':filter_list})
 class BudgetCategoryView(LoginRequiredMixin,View):
     template_name = "spent/budget_category.html"
@@ -953,7 +986,7 @@ class AddSpentView(LoginRequiredMixin,View):
                     columns = [col[0] for col in cursor.description]
                     weekly_savings = [dict(zip(columns, row)) for row in cursor.fetchall()]
                     #call update method
-                create_update_weekly_savings(weekly_savings) #update/create weekly savings
+                create_update_weekly_savings(weekly_savings,user) #update/create weekly savings
             else:
                 return HttpResponse("You have already spent that item, do you wish to update the item???")
             return redirect("daily_list")
@@ -974,6 +1007,9 @@ class UpdateSpentView(LoginRequiredMixin,View):
         return render(request,self.template_name,{'form':form})
     def post(self,request,id):
         user = User.objects.get(username=self.request.user)
+        today = datetime.datetime.now().date() # useful for weekly savings
+        week_start = today - datetime.timedelta(days=today.weekday())  # useful for weekly savings
+        week_end = week_start + datetime.timedelta(days=6)  # useful for weekly savings
         spent = Spent.objects.get(pk=id)
         form = SpentForm(user,request.POST)
         if(form.is_valid()):
@@ -988,6 +1024,14 @@ class UpdateSpentView(LoginRequiredMixin,View):
             record.comment = comment
             record.user_id=user
             record.save()
+
+        # Create or Update Weekly update.
+            with connection.cursor() as cursor:
+                cursor.execute(weekly_saving_data_query(today,week_start,week_end,user))
+                columns = [col[0] for col in cursor.description]
+                weekly_savings = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                #call update method
+            create_update_weekly_savings(weekly_savings,user) #update/create weekly savings
             return redirect('daily_list')
         else:
             return render(request, self.template_name, {'form': form,'error':'Some Error Ocurred'})
@@ -1021,6 +1065,10 @@ class DailyListView(LoginRequiredMixin,View):
         user_id = user.id
         totals = spents.aggregate(totals=Sum('amount')) #calculate aggregated Spent
         weektotals = weekspents.aggregate(totals=Sum('amount')) #calculate weekly spent for the week
+        if current_track.end_date > today:
+            days_remaining = (current_track.end_date - today).days
+        else:
+            days_remaining = 1000000
 
         with connection.cursor() as cursor:
             cursor.execute(f"""
@@ -1037,6 +1085,23 @@ class DailyListView(LoginRequiredMixin,View):
                 """)
             columns = [col[0] for col in cursor.description]
             urgent_data = [dict(zip(columns,row)) for row in cursor.fetchall()]
+
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+                select sum(s.amount) as amount_spent
+                from spent_tracking tr
+                inner join spent_spent s on tr.spent_id_id = s.id
+                where tr.voided = 0
+                and (tr.track_id_id, tr.user_id_id) in
+                (
+                select t.id,t.user_id_id
+                from spent_track t where t.id = {current_track.id}
+                and t.voided =0
+                )
+            """)
+            columns = [col[0] for col in cursor.description]
+            amount_spent = [dict(zip(columns,row)) for row in cursor.fetchall()]
+
 
 
 
@@ -1080,10 +1145,16 @@ class DailyListView(LoginRequiredMixin,View):
             wktotals = 0
         else:
             wktotals = weektotals.get('totals',0)
-        return render(request,"spent/daily_spent.html",{'daily_spent':spents,'totals':totals.get('totals',0),'weektotals':wktotals,
-        'daily_limit':current_track.daily_limit,'weekly_limit' : current_track.daily_limit * 7,
-        'debt':(debt_owed-debt_paid),'weekly_deficit':(current_track.daily_limit *7)-wktotals,
-        'urgent_data': urgent_data,'num':len(urgent_data)})
+        return render(request,"spent/daily_spent.html",{
+            'daily_spent':spents,'totals':totals.get('totals',0),'weektotals':wktotals,
+            'daily_limit':current_track.daily_limit,'weekly_limit' : current_track.daily_limit * 7,
+            'debt':(debt_owed-debt_paid),
+            'weekly_deficit':(current_track.daily_limit *7)-wktotals,
+            'urgent_data': urgent_data,'num':len(urgent_data),
+            'amount_spent':amount_spent[0].get('amount_spent',0),
+            'track_amount':current_track.amount,
+            'daily_estimate':math.floor(((current_track.amount-amount_spent[0].get('amount_spent',0))/days_remaining))
+        })
 
 
 class AllListView(LoginRequiredMixin,View):
@@ -2231,9 +2302,28 @@ class CreateSavingsTrackingView(LoginRequiredMixin,View):
         return render(request, "spent/create_savings_tracking.html", {"select_values": choices})
 
 
+class UpdateWeeklySurplusView(LoginRequiredMixin,View):
+    def post(self,request):
+        today = datetime.datetime.now().date()
+        one_week_ago = today - datetime.timedelta(weeks=1)
+        last_day_of_week = one_week_ago + datetime.timedelta(days=(6 - one_week_ago.weekday()))
+        SpentWeekBudget.objects.filter(week_end__lte=last_day_of_week, locked=False).update(locked=True)  # lock everything that is more than one week from the current date
+
+        id = int(request.POST['week_cat'])
+        amount_bf = int(request.POST['amountBf'])
+        amount_saved = int(request.POST['amountSaved'])
+        if(amount_saved > 0):
+            spent_obj = SpentWeekBudget.objects.get(pk=id)
+            if(spent_obj.locked is False):
+                spent_obj.amount_bf = amount_bf
+                spent_obj.amount_saved = amount_saved + spent_obj.amount_saved
+                spent_obj.save()
+        return redirect("weekly_savings")
+
+
 
 #utils functions
-def create_update_weekly_savings(data):
+def create_update_weekly_savings(data,user):
     for item in data:
         budget_id = item['budget_id']
         budget_category_id = item['budget_category_id']
@@ -2273,4 +2363,5 @@ def create_update_weekly_savings(data):
             new_spent_obj.week_budget = week_budget
             new_spent_obj.week_spent = week_spent
             new_spent_obj.week_remaining = week_remaining
+            new_spent_obj.user_id = user
             new_spent_obj.save()

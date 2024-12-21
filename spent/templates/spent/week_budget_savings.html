@@ -12,7 +12,7 @@
                     <label for="week">Select: Budget Week</label>
                     <select class="form-control" id="week" name="week_select">
                       {% for week in filter_list %}
-                        <option value="{{week.week_start}}:{{week.week_end}}">{{week.week_start}}<--->{{week.week_end}}</option>
+                        <option value="{{week.budget_id_id}}:{{week.week_start}}:{{week.week_end}}">{{week.budget_id_id}}-{{week.week_start}}<--->{{week.week_end}}</option>
                       {% endfor %}
 
                     </select>
@@ -24,6 +24,7 @@
     <table class="table table-sm">
       <thead class="table-head">
         <tr>
+            <th></th>
           <th>Budget</th>
           <th>Category</th>
           <th>Week Start</th>
@@ -35,14 +36,16 @@
           <th>Def/Sup</th>
           <th>Amt BF</th>
           <th>Amt Saved</th>
+          <th>Budget Saved</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody class="table-body">
       {% for obj in weekly_savings %}
         <tr>
-          <td>{{obj.budget_id.name}}</td>
-          <td>{{obj.budget_category_id.name}}</td>
+          <td>{{obj.id}}</td>
+          <td>{{obj.budget_name}}</td>
+          <td>{{obj.budget_category}}</td>
           <td>{{obj.week_start}}</td>
           <td>{{obj.week_end}}</td>
           <td>{{obj.budget_amount}}</td>
@@ -52,9 +55,14 @@
           <td>{{obj.week_remaining}}</td>
           <td>{{obj.amount_bf}}</td>
           <td>{{obj.amount_saved}}</td>
+          <td>{{obj.budget_saved}}</td>
+          {% if obj.locked %}
           <td>
-            <button class="badge badge-pill badge-success" data-toggle="modal" data-target="#weekBudgetModal">Action</button>
+              <span class="badge badge-danger">Locked</span>
           </td>
+          {% else %}
+            <td><span class="badge badge-pill badge-success btnAction" data-toggle="modal" data-target="#weekBudgetModal">Action</span></td>
+          {% endif %}
         </tr>
       {% endfor %}
       </tbody>
@@ -72,40 +80,101 @@
           </button>
         </div>
         <div class="modal-body">
-          <form id="weekBudgetForm">
+          <form id="weekBudgetForm" action="{%url 'update_week_surplus' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" id= "week_cat_id" name="week_cat"/>
             <div class="form-group">
-              <label for="weekStart">Week Start : November 11, 2024</label>
+              <label for="weekStart">Week Start :</label>
             </div>
             <div class="form-group">
-              <label for="weekEnd">Week End: November 11, 2024 </label>
+              <label for="weekEnd">Week End: </label>
             </div>
             <div class="form-group">
-              <label for="weekRemaining">Week Remaining: 5000</label>
+              <label for="category">Category :</label>
             </div>
+            <div class="form-group">
+              <label for="weekRemaining">Week Remaining:</label>
+              <input type="hidden" id="week_remaining_id" />
+            </div>
+            <div class="form-group">
+              <label for="previousSaved">Previous Saved:</label>
+              <input type="hidden" id="previous_saved_id" />
+            </div>
+            <div class="form-group">
+              <label for="budget_saved">Total Budget Saved:</label>
+              <input type="hidden" id="budget_saved" />
+            </div>
+
             <div class="form-group">
               <label for="amountSaved">Amount Saved</label>
-              <input type="number" class="form-control" id="amountSaved" name="amountSaved">
+              <input type="number" class="form-control" id="amountSaved" name="amountSaved" onChange="calculateAmountBF()">
             </div>
             <div class="form-group">
-              <label for="amountBf">Amount BF</label>
+              <label for="amountBf">Amount Brought Forward</label>
               <input type="number" class="form-control" id="amountBf" name="amountBf" readonly>
+
             </div>
+
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" >Post</button>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="calculateAmountBF()">Save</button>
+
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const actionButtons = document.querySelectorAll(".btnAction"); //get all buttons
+    actionButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        // Get the parent row of the clicked button
+        const row = this.closest("tr");
+
+        // Extract values from the row
+        const id = row.children[0].textContent.trim();
+        const category = row.children[2].textContent.trim();
+        const weekStart = row.children[3].textContent.trim();
+        const weekEnd = row.children[4].textContent.trim();
+        const weekRemaining = row.children[9].textContent.trim();
+        const previousSaved = row.children[11].textContent.trim() || "0"; // Default to 0 if None
+        const amountSaved = row.children[11].textContent.trim() || "0"; // Default to 0 if None
+        const budgetSaved = row.children[12].textContent.trim() || "0"; // Default to 0 if None
+        const previousSavedFinal = (previousSaved === "None" || previousSaved === "" || isNaN(previousSaved)) ? "0" : amountSaved;
+        const TotalSavedFinal = (budgetSaved === "None" || budgetSaved === "" || isNaN(budgetSaved)) ? "0" : budgetSaved;
+
+        // Populate modal fields
+        document.getElementById("week_cat_id").value = id;
+        document.getElementById("week_remaining_id").value = weekRemaining-previousSavedFinal;
+        document.getElementById("previous_saved_id").value = previousSaved;
+        document.getElementById("budget_saved").value = TotalSavedFinal;
+        document.querySelector("#weekBudgetModal label[for='previousSaved']").textContent = `Previous Saved: ${previousSaved}`;
+        document.querySelector("#weekBudgetModal label[for='category']").textContent = `Category: ${category}`;
+        document.querySelector("#weekBudgetModal label[for='weekStart']").textContent = `Week Start: ${weekStart}`;
+        document.querySelector("#weekBudgetModal label[for='weekEnd']").textContent = `Week End: ${weekEnd}`;
+        document.querySelector("#weekBudgetModal label[for='weekRemaining']").textContent = `Week Remaining: ${weekRemaining-previousSavedFinal}`;
+        document.querySelector("#weekBudgetModal input#amountSaved").value = amountSaved;
+      });
+    });
+  });
+
+
     function calculateAmountBF() {
-      const weekRemaining = parseFloat(document.getElementById('weekRemaining').value) || 0;
+      const weekRemaining = parseFloat(document.getElementById('week_remaining_id').value) || 0;
       const amountSaved = parseFloat(document.getElementById('amountSaved').value) || 0;
+      const previousSavedAmount =parseFloat(document.getElementById('previous_saved_id').value) || 0;
       const amountBf = weekRemaining - amountSaved;
-      document.getElementById('amountBf').value = amountBf.toFixed(2);
+
+      if(amountSaved < 0){
+      document.getElementById('amountBf').value = 0;
+      document.getElementById('amountSaved').value = 0;
+      }else{
+          document.getElementById('amountBf').value = amountBf < 0 ? 0: amountBf;
+        document.getElementById('amountSaved').value = amountBf < 0 ? 0 : amountSaved;
+      }
     }
   </script>
 
