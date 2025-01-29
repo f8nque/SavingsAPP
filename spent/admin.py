@@ -5,6 +5,7 @@ admin.site.register(models.Spent)
 admin.site.register(models.Track)
 admin.site.register(models.Tracker)
 admin.site.register(models.Tracking)
+admin.site.register(models.Information)
 # Register your models here.
 
 

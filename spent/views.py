@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.views.generic.list import ListView
 from django.http import HttpResponse
 from .forms import CategoryForm,SpentForm,TrackForm,TrackingForm,BudgetCategoryForm,BudgetForm,BudgetClassItemForm,BudgetItemForm,UpdateCategoryForm
-from .models import Spent,Category,SavingsTracker,Tracker,Track,Tracking,NotIn,BudgetCategory,Budget,BudgetItem,BudgetClassItem,BudgetLog,WeeklySavingsTracker,SpentWeekBudget
+from .models import Spent,Category,SavingsTracker,Tracker,Track,Tracking,NotIn,BudgetCategory,Budget,BudgetItem,BudgetClassItem,BudgetLog,WeeklySavingsTracker,SpentWeekBudget,Information
 from django.views import View
 import datetime
 import calendar
@@ -17,6 +17,7 @@ from django.db import connection
 from django.conf import settings
 from .utils import TrackingDict
 import math
+from types import SimpleNamespace
 from planner.utility import db_update
 from .queries import weekly_saving_data_query
 # Create your views here.
@@ -1061,10 +1062,16 @@ class DailyListView(LoginRequiredMixin,View):
         week_end = week_start + datetime.timedelta(days=6)
         spents = Spent.objects.filter(date=today,voided=0,user_id=user)
         weekspents = Spent.objects.filter(date__gte=week_start,date__lte=week_end,voided=0,user_id=user)
-        current_track = Track.objects.filter(start_date__lte=today,end_date__gte=today)[0]
+        current_track = Track.objects.filter(start_date__lte=today,end_date__gte=today,user_id = user)
+        if len(current_track) > 0 :
+            current_track = current_track[0]
+        else:
+            current_track =SimpleNamespace(end_date=datetime.date(2000,1,1), id =0,daily_limit=0,amount=0)
         user_id = user.id
         totals = spents.aggregate(totals=Sum('amount')) #calculate aggregated Spent
         weektotals = weekspents.aggregate(totals=Sum('amount')) #calculate weekly spent for the week
+
+        #
         if current_track.end_date > today:
             days_remaining = (current_track.end_date - today).days
         else:
@@ -1082,6 +1089,7 @@ class DailyListView(LoginRequiredMixin,View):
                 where si.voided = 0
                 and si.urgent = 'yes'
                 and si.status <> 'completed'
+                and si.user_id_id ={user.id}
                 """)
             columns = [col[0] for col in cursor.description]
             urgent_data = [dict(zip(columns,row)) for row in cursor.fetchall()]
@@ -1101,6 +1109,10 @@ class DailyListView(LoginRequiredMixin,View):
             """)
             columns = [col[0] for col in cursor.description]
             amount_spent = [dict(zip(columns,row)) for row in cursor.fetchall()]
+            if amount_spent[0]['amount_spent'] is not None:
+                amount_spent_total = amount_spent[0]['amount_spent']
+            else:
+                amount_spent_total = 0
 
 
 
@@ -1145,15 +1157,21 @@ class DailyListView(LoginRequiredMixin,View):
             wktotals = 0
         else:
             wktotals = weektotals.get('totals',0)
+        school_info_list = Information.objects.filter(voided=0,start_date__lte=today, end_date__gte=today,user_id = user)
+        if len(school_info_list) > 0:
+            school_info = school_info_list[0]
+        else:
+            school_info = None
         return render(request,"spent/daily_spent.html",{
             'daily_spent':spents,'totals':totals.get('totals',0),'weektotals':wktotals,
             'daily_limit':current_track.daily_limit,'weekly_limit' : current_track.daily_limit * 7,
             'debt':(debt_owed-debt_paid),
             'weekly_deficit':(current_track.daily_limit *7)-wktotals,
             'urgent_data': urgent_data,'num':len(urgent_data),
-            'amount_spent':amount_spent[0].get('amount_spent',0),
+            'amount_spent':amount_spent_total,
             'track_amount':current_track.amount,
-            'daily_estimate':math.floor(((current_track.amount-amount_spent[0].get('amount_spent',0))/days_remaining))
+            'daily_estimate':math.floor(((current_track.amount-amount_spent_total)/days_remaining)),
+            'school_info':school_info,
         })
 
 
@@ -2116,7 +2134,7 @@ class BudgetPerformanceView(LoginRequiredMixin,View):
             cursor.execute(f"""
                 select b.id,b.name from spent_budget b
                 inner join spent_track t on b.track_id_id = t.id
-                where b.user_id_id = 1 and t.voided =0
+                where b.user_id_id = {user.id} and t.voided =0
                 order by t.start_date desc
                 limit 24
             """)

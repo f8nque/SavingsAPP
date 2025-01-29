@@ -196,6 +196,7 @@ class TransactionListView(View,LoginRequiredMixin):
             )trans on t.id = trans.transact_id_id
             where t.voided=0 and t.user_id_id={user.id}) b on a.id = b.allocate_id_id
             where a.voided=0
+            and a.user_id_id = {user.id}
             order by a.allocate_date desc) final
             group by final.id
             order by final.allocate_date desc

@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {%block title %} Spent | DailySpent {%endblock title %}
 {% block content %}
+{% if school_info %}
+        <p class="alert alert-info text-center">{{school_info.start_date| date:'d M Y'}}-{{school_info.end_date|date:'d M Y'}}: {{school_info.topic}}</p>
+{% endif %}
+
 <h1 class="text-center text-primary font-weight-bold">DAILY SPENT LIST</h1>
 <hr/>
 <div class="carousel">

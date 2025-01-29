@@ -26,7 +26,15 @@ class NotIn(In):
 
 from django.db import models
 
+class Information(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField()
+    topic = models.CharField(max_length=256)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete = models.CASCADE)
+    voided = models.IntegerField(default =0)
 
+    def __str__(self):
+        return f'{self.start_date}-{self.end_date}: {self.topic}'
 
 
 
